@@ -1541,7 +1541,7 @@
         const { useState, useEffect, useRef } = React;
 
         // Configuration
-        const API_BASE_URL = 'http://localhost:8080';
+        const API_BASE_URL = window.location.origin;
         const COGNEE_BASE_URL = 'http://localhost:8000';
 
         // Inline SVGs as React Components for cleaner markup
