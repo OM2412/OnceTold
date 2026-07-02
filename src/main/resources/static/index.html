@@ -1,0 +1,2768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OnceTold - Support Portal</title>
+    
+    <!-- Google Fonts: Inter and Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    
+    <!-- Babel Standalone (for in-browser JSX compilation) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Custom Styling (Vanilla CSS) -->
+    <style>
+        /* Base Reset & Variables */
+        :root {
+            --primary-color: #2B2D6E;
+            --primary-light: #444793;
+            --primary-dark: #1E2050;
+            --accent-color: #E8A33D;
+            --accent-light: #F2BA65;
+            --accent-dark: #C9821B;
+            --bg-color: #F7F5F0;
+            --card-bg: #FFFFFF;
+            --text-main: #2A2A35;
+            --text-muted: #6B6B7F;
+            --border-color: #E2E0D9;
+            --agent-green: #2D6E4E;
+            --agent-green-light: #3D8F67;
+            --danger-color: #C93B3B;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
+            --shadow-md: 0 4px 12px rgba(43, 45, 110, 0.08);
+            --shadow-lg: 0 12px 24px rgba(43, 45, 110, 0.12);
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* SVG logo customization */
+        .logo-svg {
+            display: block;
+        }
+        .logo-container {
+            display: inline-flex;
+            font-family: 'Poppins', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+        }
+        .logo-icon {
+            margin-right: 8px;
+        }
+        .logo-text {
+            letter-spacing: 0.5px;
+            margin-left: 4px;
+            display: inline-flex;
+            align-items: center;
+            font-weight: 700;
+        }
+        .logo-once {
+            color: #2B2D6E;
+        }
+        .logo-told {
+            color: #E8A33D;
+            font-weight: 700;
+        }
+        .logo-nav .tagline-text {
+            display: none;
+        }
+        .tagline-text {
+            color: #5A5A6E;
+            letter-spacing: 0.5px;
+            font-weight: 400;
+            margin-top: 2px;
+        }
+
+        /* Keyframes */
+        @keyframes msgFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes amberGlow {
+            0%, 100% {
+                box-shadow: 0 0 10px rgba(232, 163, 61, 0.15);
+                border-color: rgba(232, 163, 61, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 22px rgba(232, 163, 61, 0.55);
+                border-color: rgba(232, 163, 61, 0.85);
+                background-color: rgba(232, 163, 61, 0.05);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Animation utilities */
+        .animate-message {
+            animation: msgFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .memory-glow {
+            animation: amberGlow 2.5s infinite ease-in-out;
+        }
+
+        /* Navbar CSS */
+        .navbar {
+            height: 64px;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            box-shadow: var(--shadow-sm);
+            z-index: 100;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn:focus-visible,
+        .new-ticket-btn:focus-visible,
+        .auth-tab:focus-visible,
+        .role-option:focus-visible,
+        .submit-btn:focus-visible,
+        .chat-send-btn:focus-visible,
+        .resolve-action-btn:focus-visible,
+        .ticket-item:focus-visible,
+        .modal-close:focus-visible {
+            outline: 3px solid rgba(232, 163, 61, 0.45);
+            outline-offset: 2px;
+        }
+
+        .user-tag {
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .user-tag.customer {
+            background-color: rgba(43, 45, 110, 0.1);
+            color: var(--primary-color);
+        }
+
+        .user-tag.agent {
+            background-color: rgba(45, 110, 78, 0.1);
+            color: var(--agent-green);
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-main);
+            font-size: 0.9rem;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            color: var(--danger-color);
+            border-color: rgba(201, 59, 59, 0.3);
+            background-color: rgba(201, 59, 59, 0.03);
+            transform: translateY(-1px);
+        }
+
+        /* Layout Main Containers */
+        .app-body {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            overflow: visible;
+            position: relative;
+        }
+
+        /* Authentication Page Container */
+        .auth-container {
+            display: flex;
+            flex: 1;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow-y: auto;
+            background:
+                radial-gradient(circle at top left, rgba(232, 163, 61, 0.14), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(43, 45, 110, 0.16), transparent 32%),
+                linear-gradient(135deg, #f8f6f1 0%, #f3efe7 100%);
+        }
+
+        .auth-shell {
+            width: 100%;
+            max-width: 1180px;
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(360px, 480px);
+            gap: 1.5rem;
+            align-items: stretch;
+        }
+
+        .auth-hero {
+            position: relative;
+            overflow: hidden;
+            border-radius: 28px;
+            padding: 3rem;
+            background:
+                linear-gradient(145deg, rgba(43, 45, 110, 0.98), rgba(30, 32, 80, 0.96)),
+                radial-gradient(circle at top right, rgba(232, 163, 61, 0.22), transparent 30%);
+            color: #ffffff;
+            box-shadow: 0 24px 50px rgba(30, 32, 80, 0.2);
+            min-height: 640px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .auth-hero::before,
+        .auth-hero::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .auth-hero::before {
+            width: 240px;
+            height: 240px;
+            top: -90px;
+            right: -60px;
+            background: rgba(232, 163, 61, 0.14);
+            filter: blur(8px);
+        }
+
+        .auth-hero::after {
+            width: 180px;
+            height: 180px;
+            bottom: -70px;
+            left: -40px;
+            background: rgba(255, 255, 255, 0.08);
+            filter: blur(10px);
+        }
+
+        .auth-hero-content,
+        .auth-hero-footer {
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.45rem 0.8rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: rgba(255, 255, 255, 0.92);
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .auth-hero-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(2.3rem, 4vw, 4.4rem);
+            line-height: 0.98;
+            letter-spacing: -0.04em;
+            margin-bottom: 1rem;
+            max-width: 11ch;
+        }
+
+        .auth-hero-copy {
+            max-width: 34rem;
+            font-size: 1.02rem;
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+        }
+
+        .auth-feature-list {
+            display: grid;
+            gap: 0.9rem;
+            max-width: 33rem;
+        }
+
+        .auth-feature-item {
+            display: flex;
+            gap: 0.85rem;
+            align-items: flex-start;
+            padding: 0.95rem 1rem;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.09);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+        }
+
+        .auth-feature-icon {
+            width: 2rem;
+            height: 2rem;
+            flex: 0 0 2rem;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(232, 163, 61, 0.2);
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .auth-feature-title {
+            font-weight: 700;
+            margin-bottom: 0.15rem;
+        }
+
+        .auth-feature-text {
+            color: rgba(255, 255, 255, 0.76);
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        .auth-hero-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.14);
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 0.9rem;
+        }
+
+        .auth-hero-stats {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .auth-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .auth-stat strong {
+            color: #fff;
+            font-size: 1.1rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .auth-card {
+            position: relative;
+            background-color: var(--card-bg);
+            border-radius: 28px;
+            width: 100%;
+            max-width: 480px;
+            padding: 2.35rem;
+            box-shadow: 0 22px 50px rgba(43, 45, 110, 0.14);
+            border: 1px solid rgba(226, 224, 217, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .auth-card-inner {
+            width: 100%;
+        }
+
+        .auth-card-topline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .auth-card-eyebrow {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent-dark);
+            background: rgba(232, 163, 61, 0.12);
+            padding: 0.4rem 0.7rem;
+            border-radius: 999px;
+        }
+
+        .auth-card-copy {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.4rem;
+        }
+
+        .auth-logo-wrapper {
+            margin-bottom: 1.25rem;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .auth-tabs {
+            display: flex;
+            width: 100%;
+            background: #f4f2ec;
+            border: 1px solid #e5e1d8;
+            border-radius: 16px;
+            padding: 0.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 0.85rem 0;
+            background: none;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 12px;
+            transition: var(--transition);
+        }
+
+        .auth-tab:hover {
+            color: var(--primary-color);
+        }
+
+        .auth-tab.active {
+            color: var(--primary-color);
+            background: #ffffff;
+            box-shadow: 0 8px 18px rgba(43, 45, 110, 0.08);
+        }
+
+        .form-group {
+            width: 100%;
+            margin-bottom: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            background-color: #FAF9F6;
+            color: var(--text-main);
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(43, 45, 110, 0.15);
+            background-color: #FFFFFF;
+        }
+
+        /* Role Selector Segment */
+        .role-selector {
+            display: flex;
+            background-color: #f4f2ec;
+            padding: 0.3rem;
+            border-radius: 14px;
+            width: 100%;
+            margin-top: 0.25rem;
+            border: 1px solid #e5e1d8;
+        }
+
+        .role-option {
+            flex: 1;
+            text-align: center;
+            padding: 0.65rem 0.4rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .role-option.active {
+            background-color: var(--card-bg);
+            color: var(--primary-color);
+            box-shadow: 0 8px 18px rgba(43, 45, 110, 0.08);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 0.85rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: #FFFFFF;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 12px 24px rgba(43, 45, 110, 0.18);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 28px rgba(43, 45, 110, 0.22);
+        }
+
+        .error-banner {
+            width: 100%;
+            background-color: rgba(201, 59, 59, 0.09);
+            border: 1px solid rgba(201, 59, 59, 0.18);
+            color: var(--danger-color);
+            padding: 0.75rem 1rem;
+            border-radius: 14px;
+            margin-bottom: 1.25rem;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Core Application Dashboard Grid Layout */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr 300px;
+            width: 100%;
+            min-height: calc(100vh - 64px);
+            height: auto;
+            gap: 1rem;
+            padding: 1rem;
+            background:
+                radial-gradient(circle at top left, rgba(43, 45, 110, 0.08), transparent 26%),
+                radial-gradient(circle at bottom right, rgba(232, 163, 61, 0.08), transparent 28%),
+                var(--bg-color);
+        }
+
+        /* For single ticket view/agent layout adjust */
+        .agent-layout {
+            grid-template-columns: 340px 1fr 300px;
+        }
+
+        .dashboard-layout > * {
+            min-width: 0;
+        }
+
+        /* Ticket List Sidebar */
+        .sidebar-tickets {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(226, 224, 217, 0.9);
+            border-radius: 24px;
+            box-shadow: 0 18px 36px rgba(43, 45, 110, 0.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 1.25rem 1.25rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background: linear-gradient(180deg, rgba(43, 45, 110, 0.03), rgba(255, 255, 255, 0));
+        }
+
+        .sidebar-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .sidebar-subtitle {
+            font-size: 0.82rem;
+            line-height: 1.5;
+            color: var(--text-muted);
+        }
+
+        .sidebar-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+
+        .sidebar-metric {
+            padding: 0.85rem 0.9rem;
+            border-radius: 16px;
+            background: #faf8f3;
+            border: 1px solid rgba(226, 224, 217, 0.9);
+        }
+
+        .sidebar-metric-value {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            line-height: 1;
+            margin-bottom: 0.2rem;
+        }
+
+        .sidebar-metric-label {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .new-ticket-btn {
+            background-color: var(--accent-color);
+            color: #1A1A1A;
+            border: none;
+            padding: 0.5rem 0.9rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: var(--transition);
+        }
+
+        .new-ticket-btn:hover {
+            background-color: var(--accent-light);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(232, 163, 61, 0.18);
+        }
+
+        .ticket-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 0.4rem;
+            gap: 0.55rem;
+        }
+
+        .ticket-item {
+            padding: 1rem;
+            border: 1px solid transparent;
+            border-radius: 18px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            text-align: left;
+            background: linear-gradient(180deg, #fff, #fcfbf8);
+            box-shadow: 0 10px 18px rgba(43, 45, 110, 0.04);
+        }
+
+        .ticket-item:hover {
+            transform: translateY(-1px);
+            border-color: rgba(43, 45, 110, 0.08);
+            box-shadow: 0 14px 22px rgba(43, 45, 110, 0.08);
+        }
+
+        .ticket-item:active {
+            transform: translateY(0);
+        }
+
+        .ticket-item.active {
+            background: linear-gradient(180deg, rgba(43, 45, 110, 0.08), rgba(43, 45, 110, 0.04));
+            border-color: rgba(43, 45, 110, 0.14);
+            box-shadow: 0 16px 28px rgba(43, 45, 110, 0.1);
+        }
+
+        .ticket-item-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .ticket-subject {
+            font-weight: 600;
+            font-size: 0.925rem;
+            color: var(--text-main);
+            line-height: 1.3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 180px;
+        }
+
+        .status-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-badge.open {
+            background-color: rgba(232, 163, 61, 0.15);
+            color: var(--accent-dark);
+        }
+
+        .status-badge.resolved {
+            background-color: rgba(45, 110, 78, 0.12);
+            color: var(--agent-green);
+        }
+
+        .ticket-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .empty-tickets-msg {
+            padding: 3rem 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        /* Central Chat Area */
+        .chat-container {
+            background-color: #FDFDFD;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 0;
+            border: 1px solid rgba(226, 224, 217, 0.9);
+            border-radius: 24px;
+            box-shadow: 0 18px 36px rgba(43, 45, 110, 0.08);
+            background: linear-gradient(180deg, #ffffff, #fcfbf7);
+        }
+
+        .chat-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .chat-header-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .chat-header-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent-dark);
+            margin-bottom: 0.15rem;
+        }
+
+        .chat-header-subject {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .chat-header-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .chat-summary-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.65rem;
+            border-radius: 999px;
+            background: rgba(43, 45, 110, 0.08);
+            color: var(--primary-color);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .resolve-action-btn {
+            background-color: var(--agent-green);
+            color: #FFFFFF;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: var(--transition);
+            box-shadow: 0 10px 18px rgba(45, 110, 78, 0.18);
+        }
+
+        .resolve-action-btn:hover {
+            background-color: var(--agent-green-light);
+            transform: translateY(-1px);
+        }
+
+        .resolve-action-btn:disabled {
+            background-color: var(--border-color);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .chat-viewport {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 1.25rem 1.25rem 1.4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            background:
+                radial-gradient(circle at top, rgba(43, 45, 110, 0.03), transparent 26%),
+                #fcfbf8;
+        }
+
+        .chat-welcome {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .chat-empty-card {
+            width: 100%;
+            max-width: 420px;
+            padding: 1.4rem 1.25rem;
+            border-radius: 20px;
+            background: linear-gradient(180deg, #ffffff, #faf8f3);
+            border: 1px solid rgba(226, 224, 217, 0.95);
+            box-shadow: 0 16px 30px rgba(43, 45, 110, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chat-empty-card h4 {
+            font-family: 'Poppins', sans-serif;
+            color: var(--primary-color);
+            font-size: 1.05rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .chat-empty-card p {
+            font-size: 0.92rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        .chat-empty-points {
+            display: grid;
+            gap: 0.65rem;
+            text-align: left;
+        }
+
+        .chat-empty-point {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            font-size: 0.87rem;
+            line-height: 1.5;
+            color: var(--text-main);
+        }
+
+        .chat-empty-point span {
+            color: var(--accent-dark);
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .chat-welcome-icon {
+            opacity: 0.15;
+            animation: pulse 4s infinite ease-in-out;
+        }
+
+        .chat-welcome-text h3 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Message Bubbles styling */
+        .message-row {
+            display: flex;
+            width: 100%;
+        }
+
+        .message-row.customer-row {
+            justify-content: flex-end;
+        }
+
+        .message-row.bot-row,
+        .message-row.agent-row {
+            justify-content: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 68%;
+            padding: 0.85rem 1.15rem;
+            font-size: 0.925rem;
+            line-height: 1.5;
+            box-shadow: 0 10px 18px rgba(43, 45, 110, 0.08);
+            position: relative;
+        }
+
+        /* CUSTOMER: right-aligned, indigo background, white text */
+        .message-bubble.customer-bubble {
+            background-color: var(--primary-color);
+            color: #FFFFFF;
+            border-radius: var(--radius-md) var(--radius-md) 0 var(--radius-md);
+        }
+
+        /* BOT: left-aligned, amber background, dark text, robot prefix */
+        .message-bubble.bot-bubble {
+            background-color: var(--accent-color);
+            color: #1F1F1F;
+            border-radius: var(--radius-md) var(--radius-md) var(--radius-md) 0;
+            font-weight: 500;
+        }
+
+        /* AGENT: left-aligned, green background, white text */
+        .message-bubble.agent-bubble {
+            background-color: var(--agent-green);
+            color: #FFFFFF;
+            border-radius: var(--radius-md) var(--radius-md) var(--radius-md) 0;
+        }
+
+        .message-meta {
+            font-size: 0.725rem;
+            margin-top: 0.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            opacity: 0.9;
+        }
+
+        .customer-bubble .message-meta {
+            color: rgba(255, 255, 255, 0.7);
+            justify-content: flex-end;
+        }
+
+        .bot-bubble .message-meta {
+            color: rgba(31, 31, 31, 0.65);
+        }
+
+        .agent-bubble .message-meta {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Chat Input Section */
+        .chat-input-area {
+            padding: 1rem 1.25rem 1.25rem;
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .chat-input-form {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .chat-input-box {
+            flex: 1;
+            padding: 0.85rem 1.15rem;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition);
+            background-color: #FAF9F6;
+        }
+
+        .chat-input-box:focus {
+            border-color: var(--primary-color);
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(43, 45, 110, 0.12);
+        }
+
+        .chat-input-box:disabled {
+            background-color: #F0EFEB;
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .chat-send-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: #FFFFFF;
+            border: none;
+            padding: 0.85rem 1.35rem;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 12px 24px rgba(43, 45, 110, 0.18);
+        }
+
+        .chat-send-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 28px rgba(43, 45, 110, 0.22);
+        }
+
+        .chat-send-btn:active:not(:disabled),
+        .resolve-action-btn:active:not(:disabled),
+        .submit-btn:active:not(:disabled),
+        .new-ticket-btn:active {
+            transform: translateY(0);
+        }
+
+        .chat-send-btn:disabled {
+            background-color: var(--border-color);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .resolved-indicator {
+            padding: 1rem 1.1rem;
+            background: linear-gradient(180deg, rgba(45, 110, 78, 0.08), rgba(45, 110, 78, 0.04));
+            border: 1px solid rgba(45, 110, 78, 0.2);
+            color: var(--agent-green);
+            text-align: center;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 12px 22px rgba(45, 110, 78, 0.08);
+        }
+
+        /* Right Sidebar: Memory Panel */
+        .sidebar-memory {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(226, 224, 217, 0.9);
+            border-radius: 24px;
+            box-shadow: 0 18px 36px rgba(43, 45, 110, 0.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 1.25rem;
+            transition: var(--transition);
+            background: linear-gradient(180deg, #ffffff, #fcfbf7);
+        }
+
+        .memory-header {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .memory-header-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .memory-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .memory-subtitle {
+            font-size: 0.775rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .memory-context-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.65rem;
+            border-radius: 999px;
+            background: rgba(232, 163, 61, 0.12);
+            color: var(--accent-dark);
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            flex: 0 0 auto;
+        }
+
+        .memory-badge {
+            background-color: var(--accent-color);
+            color: #1A1A1A;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .memory-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding-right: 0.25rem;
+        }
+
+        .memory-item {
+            background: linear-gradient(180deg, #fffdf7, #fdf9ef);
+            border: 1px solid rgba(226, 224, 217, 0.9);
+            padding: 0.9rem;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: #404050;
+            border-left: 3px solid var(--accent-color);
+            position: relative;
+            box-shadow: 0 10px 18px rgba(43, 45, 110, 0.04);
+        }
+
+        .memory-item-empty {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            padding: 3rem 1rem;
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .dashboard-empty-state {
+            padding: 1rem;
+            border-radius: 18px;
+            background: #faf8f3;
+            border: 1px dashed rgba(226, 224, 217, 0.95);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Modal Layout */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(30, 30, 50, 0.4);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius-md);
+            width: 100%;
+            max-width: 480px;
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--danger-color);
+            transform: scale(1.05);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+
+            .animate-message,
+            .memory-glow,
+            .chat-welcome-icon {
+                animation: none !important;
+            }
+        }
+
+        .cancel-btn {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .cancel-btn:hover {
+            background-color: #FAF9F6;
+            color: var(--text-main);
+        }
+
+        /* Loader */
+        .spinner {
+            border: 3px solid rgba(43, 45, 110, 0.1);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border-left-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        .spinner-accent {
+            border: 3px solid rgba(232, 163, 61, 0.1);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border-left-color: var(--accent-color);
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Layout */
+        @media (max-width: 1200px) {
+            .dashboard-layout,
+            .dashboard-layout.agent-layout {
+                grid-template-columns: 280px 1fr;
+            }
+
+            .sidebar-memory {
+                grid-column: 1 / -1;
+                border-left: 0;
+                border-top: 1px solid var(--border-color);
+            }
+        }
+
+        @media (max-width: 900px) {
+            body {
+                min-height: 100svh;
+            }
+
+            .navbar {
+                height: auto;
+                min-height: 64px;
+                padding: 0.85rem 1rem;
+                gap: 0.75rem;
+                flex-wrap: wrap;
+            }
+
+            .navbar-user {
+                gap: 0.6rem;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+
+            .app-body {
+                flex-direction: column;
+            }
+
+            .dashboard-layout,
+            .dashboard-layout.agent-layout {
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
+
+            .sidebar-tickets {
+                order: 1;
+                border-right: 0;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .chat-container {
+                order: 2;
+                min-height: 60vh;
+            }
+
+            .sidebar-memory {
+                order: 3;
+                border-left: 0;
+                border-top: 1px solid var(--border-color);
+                min-height: 280px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .auth-container {
+                padding: 1rem;
+            }
+
+            .auth-shell {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .auth-hero {
+                min-height: auto;
+                padding: 1.5rem;
+                border-radius: 22px;
+            }
+
+            .auth-hero-title {
+                max-width: none;
+            }
+
+            .auth-hero-footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .auth-card {
+                max-width: 100%;
+                padding: 1.5rem;
+                border-radius: 16px;
+            }
+
+            .auth-tabs,
+            .role-selector {
+                flex-direction: column;
+            }
+
+            .auth-tab {
+                padding: 0.9rem 0;
+            }
+
+            .role-option {
+                padding: 0.75rem 0;
+            }
+
+            .chat-header,
+            .chat-input-area,
+            .sidebar-header,
+            .sidebar-memory {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .chat-viewport {
+                padding: 1rem;
+                gap: 0.9rem;
+            }
+
+            .chat-welcome {
+                padding: 1.5rem 1rem;
+            }
+
+            .message-bubble {
+                max-width: 90%;
+            }
+
+            .ticket-subject {
+                max-width: 100%;
+                white-space: normal;
+            }
+
+            .ticket-item-header {
+                align-items: flex-start;
+            }
+
+            .chat-input-form {
+                flex-direction: column;
+            }
+
+            .chat-send-btn {
+                width: 100%;
+            }
+
+            .modal-card {
+                margin: 1rem;
+                padding: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- App Mounting Target -->
+    <div id="root"></div>
+
+    <!-- Inline JSX script compiled by Babel -->
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Configuration
+        const API_BASE_URL = 'http://localhost:8080';
+        const COGNEE_BASE_URL = 'http://localhost:8000';
+
+        // Inline SVGs as React Components for cleaner markup
+        const Logo = ({ tagline = true, height = 50, className = "" }) => {
+            const iconHeight = height;
+            return (
+                <div 
+                    className={`logo-container ${tagline ? 'show-tagline' : 'logo-nav'} ${className}`}
+                    style={{
+                        display: 'inline-flex',
+                        flexDirection: tagline ? 'column' : 'row',
+                        alignItems: tagline ? 'flex-start' : 'center',
+                        justifyContent: 'center'
+                    }}
+                >
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <svg 
+                            viewBox="0 0 160 160" 
+                            xmlns="http://www.w3.org/2000/svg"
+                            style={{ height: `${iconHeight}px`, width: `${iconHeight}px` }}
+                            className="logo-svg logo-icon"
+                        >
+                            <defs>
+                                <style>{`
+                                    .ring { fill: none; stroke: #2B2D6E; stroke-width: 9; stroke-linecap: round; }
+                                    .accent { fill: #E8A33D; }
+                                `}</style>
+                            </defs>
+                            <g transform="translate(10,10) scale(0.7)">
+                                <path className="ring" d="M40 50 Q40 30 60 30 L140 30 Q160 30 160 50 L160 105 Q160 125 140 125 L92 125 L65 150 L70 122 Q40 120 40 100 Z" />
+                                <circle cx="68" cy="78" r="5" fill="#2B2D6E" opacity="0.35"/>
+                                <circle cx="86" cy="68" r="6" fill="#2B2D6E" opacity="0.55"/>
+                                <circle cx="108" cy="70" r="7" fill="#2B2D6E" opacity="0.75"/>
+                                <circle cx="128" cy="82" r="9" className="accent"/>
+                            </g>
+                        </svg>
+                        <span 
+                            className="logo-text"
+                            style={{ 
+                                fontSize: `${iconHeight * 0.9}px`
+                            }}
+                        >
+                            <span className="logo-once">Once</span>
+                            <span className="logo-told">Told</span>
+                        </span>
+                    </div>
+                    {tagline && (
+                        <div 
+                            className="tagline-text"
+                            style={{ 
+                                fontSize: `${iconHeight * 0.32}px`,
+                                paddingLeft: `${iconHeight + 12}px`
+                            }}
+                        >
+                            Tell us once. We'll remember.
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // JWT token utility to parse sub, role and userId
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                const decoded = JSON.parse(jsonPayload);
+                
+                return {
+                    userId: decoded.userId || decoded.sub || "user",
+                    role: decoded.role || (decoded.roles && decoded.roles[0]) || "CUSTOMER",
+                    email: decoded.email || decoded.sub || "user@example.com"
+                };
+            } catch (e) {
+                console.error("JWT Decode Failed:", e);
+                return null;
+            }
+        }
+
+        // Main App Component
+        function App() {
+            const [token, setToken] = useState(localStorage.getItem('token') || '');
+            const [user, setUser] = useState(null);
+            const [currentView, setCurrentView] = useState('login'); // login, customer, agent
+            const [tickets, setTickets] = useState([]);
+            const [selectedTicketId, setSelectedTicketId] = useState(null);
+            const [selectedTicket, setSelectedTicket] = useState(null);
+            const [memories, setMemories] = useState([]);
+            const [memoriesLoading, setMemoriesLoading] = React.useState(false);
+            const [errorMsg, setErrorMsg] = useState('');
+            const [loading, setLoading] = useState(false);
+
+            // Decode token on mount or update
+            useEffect(() => {
+                if (token) {
+                    localStorage.setItem('token', token);
+                    const parsed = parseJwt(token);
+                    if (parsed) {
+                        setUser(parsed);
+                        setCurrentView(parsed.role === 'AGENT' ? 'agent' : 'customer');
+                    } else {
+                        handleLogout();
+                    }
+                } else {
+                    localStorage.removeItem('token');
+                    setUser(null);
+                    setCurrentView(prev => prev === 'logged-out' ? 'logged-out' : 'login');
+                }
+            }, [token]);
+
+            const handleLogout = () => {
+                setToken('');
+                setUser(null);
+                setTickets([]);
+                setSelectedTicketId(null);
+                setSelectedTicket(null);
+                setMemories([]);
+                setCurrentView('logged-out');
+                setTimeout(() => {
+                    setCurrentView('login');
+                }, 1500);
+            };
+
+            const getAuthHeader = () => {
+                return {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                };
+            };
+
+            // Fetch Ticket List
+            const fetchTickets = async () => {
+                if (!token) return;
+                try {
+                    const url = currentView === 'agent'
+                        ? `${API_BASE_URL}/api/tickets/all`
+                        : `${API_BASE_URL}/api/tickets`;
+                    const response = await fetch(url, {
+                        headers: getAuthHeader()
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        setTickets(data);
+                    } else if (response.status === 401) {
+                        handleLogout();
+                    }
+                } catch (err) {
+                    console.error("Error fetching tickets:", err);
+                }
+            };
+
+            // Poll for tickets and selected ticket updates
+            useEffect(() => {
+                if (!token) return;
+                fetchTickets();
+                
+                const interval = setInterval(() => {
+                    fetchTickets();
+                }, 5000); // Poll every 5 seconds
+
+                return () => clearInterval(interval);
+            }, [token, currentView]);
+
+            // Fetch single ticket details (messages) when selected
+            const fetchSelectedTicket = async (ticketId) => {
+                if (!token || !ticketId) return;
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}`, {
+                        headers: getAuthHeader()
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        setSelectedTicket(data);
+                        // If selectedTicket changes, trigger memory recall for that customer
+                        const customerIdToRecall = data.customerId;
+                        if (customerIdToRecall) {
+                            fetchMemories(customerIdToRecall);
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error fetching ticket detail:", err);
+                }
+            };
+
+            // Effect to refresh selected ticket details
+            useEffect(() => {
+                if (!selectedTicketId) {
+                    setSelectedTicket(null);
+                    setMemories([]);
+                    return;
+                }
+                
+                fetchSelectedTicket(selectedTicketId);
+
+                // Setup polling for the selected ticket
+                const interval = setInterval(() => {
+                    fetchSelectedTicket(selectedTicketId);
+                }, 4000); // Chat polling slightly faster for responsive conversation feel
+
+                return () => clearInterval(interval);
+            }, [selectedTicketId]);
+
+            // Fetch Cognee memory recall
+            const fetchMemories = async (customerId) => {
+                if (!customerId) return;
+                setMemoriesLoading(true);
+                try {
+                    const response = await fetch(`${COGNEE_BASE_URL}/recall?customer_id=${customerId}&query=history`, {
+                        method: 'GET'
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        // user specified format: { "customer_id": "1", "status": "recalled", "memories": [...] }
+                        setMemories(data.memories || []);
+                    } else {
+                        console.warn("Cognee service recall returned error status code: " + response.status);
+                    }
+                } catch (err) {
+                    console.warn("Cognee memory recall server is unavailable on port 8000.", err);
+                } finally {
+                    setMemoriesLoading(false);
+                }
+            };
+
+            // Fire memory recall whenever a ticket is selected, using the current user's id.
+            // For agents, selectedTicket.customerId is preferred; customers fall back to their own id.
+            useEffect(() => {
+                if (!selectedTicket) {
+                    setMemories([]);
+                    return;
+                }
+                const idToRecall = selectedTicket.customerId || (user && user.userId);
+                if (idToRecall) {
+                    fetchMemories(idToRecall);
+                }
+            }, [selectedTicket]);
+
+            return (
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    {currentView !== 'login' && currentView !== 'logged-out' && (
+                        <Navbar user={user} onLogout={handleLogout} />
+                    )}
+                    
+                    <div className="app-body">
+                        {currentView === 'logged-out' ? (
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flex: 1,
+                                minHeight: '60vh',
+                                textAlign: 'center',
+                                padding: '2rem'
+                            }}>
+                                <div className="auth-card" style={{ maxWidth: '400px' }}>
+                                    <span style={{ fontSize: '3rem', display: 'block', marginBottom: '1rem' }}>👋</span>
+                                    <h3 style={{ fontFamily: 'Poppins, sans-serif', color: 'var(--primary-color)', marginBottom: '0.5rem' }}>
+                                        You've been logged out successfully
+                                    </h3>
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                        Redirecting to login portal...
+                                    </p>
+                                </div>
+                            </div>
+                        ) : currentView === 'login' ? (
+                            <AuthPage 
+                                setToken={setToken} 
+                                errorMsg={errorMsg} 
+                                setErrorMsg={setErrorMsg} 
+                                loading={loading} 
+                                setLoading={setLoading}
+                            />
+                        ) : currentView === 'customer' ? (
+                            <CustomerDashboard 
+                                tickets={tickets}
+                                selectedTicketId={selectedTicketId}
+                                setSelectedTicketId={setSelectedTicketId}
+                                selectedTicket={selectedTicket}
+                                fetchTickets={fetchTickets}
+                                fetchSelectedTicket={fetchSelectedTicket}
+                                memories={memories}
+                                memoriesLoading={memoriesLoading}
+                                user={user}
+                                getAuthHeader={getAuthHeader}
+                            />
+                        ) : (
+                            <AgentDashboard 
+                                tickets={tickets}
+                                selectedTicketId={selectedTicketId}
+                                setSelectedTicketId={setSelectedTicketId}
+                                selectedTicket={selectedTicket}
+                                fetchTickets={fetchTickets}
+                                fetchSelectedTicket={fetchSelectedTicket}
+                                memories={memories}
+                                memoriesLoading={memoriesLoading}
+                                getAuthHeader={getAuthHeader}
+                            />
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Navbar Component
+        function Navbar({ user, onLogout }) {
+            return (
+                <nav className="navbar">
+                    <div className="navbar-brand">
+                        <Logo tagline={false} height={42} />
+                    </div>
+                    {user && (
+                        <div className="navbar-user">
+                            <span className={`user-tag ${user.role.toLowerCase()}`}>
+                                {user.role}
+                            </span>
+                            <span className="user-name">{user.email}</span>
+                            <button className="logout-btn" onClick={onLogout}>
+                                🚪 Logout
+                            </button>
+                        </div>
+                    )}
+                </nav>
+            );
+        }
+
+        // AuthPage (Login/Register Card)
+        function AuthPage({ setToken, errorMsg, setErrorMsg, loading, setLoading }) {
+            const [activeTab, setActiveTab] = useState('login'); // login, register
+            const [email, setEmail] = useState('');
+            const [name, setName] = useState('');
+            const [password, setPassword] = useState('');
+            const [role, setRole] = useState('CUSTOMER'); // CUSTOMER, AGENT
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setErrorMsg('');
+                setLoading(true);
+
+                if (!email || !password) {
+                    setErrorMsg('Email and password are required');
+                    setLoading(false);
+                    return;
+                }
+
+                if (activeTab === 'register' && !name) {
+                    setErrorMsg('Name is required');
+                    setLoading(false);
+                    return;
+                }
+
+                try {
+                    const endpoint = activeTab === 'login' ? '/api/auth/login' : '/api/auth/register';
+                    const payload = activeTab === 'login' 
+                        ? { email, password }
+                        : { email, password, role, name };
+
+                    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.token) {
+                            setToken(data.token);
+                        } else {
+                            setErrorMsg('Server did not return authentication token');
+                        }
+                    } else {
+                        // Read actual response body before deciding the error message
+                        let errorMsgText = '';
+                        try {
+                            const text = await response.text();
+                            errorMsgText = text;
+                            try {
+                                const parsed = JSON.parse(text);
+                                errorMsgText = parsed.message || parsed.error || text;
+                            } catch (jsonErr) {
+                                // Not JSON
+                            }
+                        } catch (readErr) {
+                            errorMsgText = 'Authentication failed';
+                        }
+
+                        if (activeTab === 'login') {
+                            if (response.status === 401) {
+                                setErrorMsg('Invalid email or password');
+                            } else if (response.status === 404) {
+                                setErrorMsg('Account not found. Please register first');
+                            } else {
+                                setErrorMsg(errorMsgText || 'Authentication failed');
+                            }
+                        } else { // activeTab === 'register'
+                            const lowerMsg = (errorMsgText || '').toLowerCase();
+                            if (response.status === 409 || (response.status >= 400 && response.status < 500 && lowerMsg.includes('already exists'))) {
+                                setErrorMsg('An account with this email already exists. Please login instead');
+                            } else if (response.status === 400) {
+                                setErrorMsg(errorMsgText || 'Validation failed');
+                            } else {
+                                setErrorMsg(errorMsgText || 'Registration failed');
+                            }
+                        }
+                    }
+                } catch (err) {
+                    setErrorMsg('Cannot connect to server. Make sure the backend is running');
+                    console.error(err);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div className="auth-container">
+                    <div className="auth-shell">
+                        <section className="auth-hero">
+                            <div className="auth-hero-content">
+                                <div className="auth-hero-badge">Support that remembers</div>
+                                <h1 className="auth-hero-title">One place for support, memory, and resolution.</h1>
+                                <p className="auth-hero-copy">
+                                    OnceTold keeps every ticket, reply, and memory cue in one place so customers get faster help and agents get better context.
+                                </p>
+
+                                <div className="auth-feature-list">
+                                    <div className="auth-feature-item">
+                                        <div className="auth-feature-icon">1</div>
+                                        <div>
+                                            <div className="auth-feature-title">Persistent context</div>
+                                            <div className="auth-feature-text">Recall important customer details automatically instead of asking the same thing twice.</div>
+                                        </div>
+                                    </div>
+                                    <div className="auth-feature-item">
+                                        <div className="auth-feature-icon">2</div>
+                                        <div>
+                                            <div className="auth-feature-title">Customer and agent views</div>
+                                            <div className="auth-feature-text">Separate workflows for support requests and operations without losing the shared thread.</div>
+                                        </div>
+                                    </div>
+                                    <div className="auth-feature-item">
+                                        <div className="auth-feature-icon">3</div>
+                                        <div>
+                                            <div className="auth-feature-title">Faster decisions</div>
+                                            <div className="auth-feature-text">See chat history, resolved status, and remembered facts in a single workspace.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="auth-hero-footer">
+                                <div className="auth-hero-stats">
+                                    <div className="auth-stat">
+                                        <strong>24/7</strong>
+                                        <span>support access</span>
+                                    </div>
+                                    <div className="auth-stat">
+                                        <strong>AI</strong>
+                                        <span>memory recall</span>
+                                    </div>
+                                </div>
+                                <div>Secure portal for customers and support agents</div>
+                            </div>
+                        </section>
+
+                        <div className="auth-card">
+                            <div className="auth-card-inner">
+                                <div className="auth-card-topline">
+                                    <div className="auth-card-eyebrow">Welcome back</div>
+                                    <Logo tagline={false} height={28} />
+                                </div>
+                                <p className="auth-card-copy">
+                                    Sign in to continue existing conversations or create a new support account in seconds.
+                                </p>
+
+                                <div className="auth-tabs">
+                                    <button 
+                                        className={`auth-tab ${activeTab === 'login' ? 'active' : ''}`}
+                                        onClick={() => { setActiveTab('login'); setErrorMsg(''); }}
+                                        type="button"
+                                    >
+                                        Login
+                                    </button>
+                                    <button 
+                                        className={`auth-tab ${activeTab === 'register' ? 'active' : ''}`}
+                                        onClick={() => { setActiveTab('register'); setErrorMsg(''); }}
+                                        type="button"
+                                    >
+                                        Register
+                                    </button>
+                                </div>
+
+                                {errorMsg && (
+                                    <div className="error-banner">
+                                        <span style={{ marginRight: '0.4rem' }}>⚠️</span>
+                                        <span>{errorMsg}</span>
+                                    </div>
+                                )}
+
+                                <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+                                    {activeTab === 'register' && (
+                                        <div className="form-group">
+                                            <label className="form-label">Full Name</label>
+                                            <input 
+                                                type="text" 
+                                                className="form-input"
+                                                value={name}
+                                                onChange={(e) => setName(e.target.value)}
+                                                placeholder="Enter your name"
+                                                disabled={loading}
+                                                required
+                                            />
+                                        </div>
+                                    )}
+
+                                    <div className="form-group">
+                                        <label className="form-label">Email Address</label>
+                                        <input 
+                                            type="email" 
+                                            className="form-input"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            placeholder="Enter email address"
+                                            disabled={loading}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Password</label>
+                                        <input 
+                                            type="password" 
+                                            className="form-input"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            placeholder="Enter password"
+                                            disabled={loading}
+                                            required
+                                        />
+                                    </div>
+
+                                    {activeTab === 'register' && (
+                                        <div className="form-group">
+                                            <label className="form-label">Role</label>
+                                            <div className="role-selector">
+                                                <button
+                                                    type="button"
+                                                    className={`role-option ${role === 'CUSTOMER' ? 'active' : ''}`}
+                                                    onClick={() => setRole('CUSTOMER')}
+                                                >
+                                                    Customer
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className={`role-option ${role === 'AGENT' ? 'active' : ''}`}
+                                                    onClick={() => setRole('AGENT')}
+                                                >
+                                                    Support Agent
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <button className="submit-btn" type="submit" disabled={loading}>
+                                        {loading ? (
+                                            <div className="spinner-accent"></div>
+                                        ) : (
+                                            <>
+                                                <span>{activeTab === 'login' ? 'Sign In' : 'Create Account'}</span>
+                                                <span style={{ marginLeft: '0.4rem' }}>→</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Customer Dashboard Portal
+        function CustomerDashboard({ 
+            tickets, 
+            selectedTicketId, 
+            setSelectedTicketId, 
+            selectedTicket, 
+            fetchTickets, 
+            fetchSelectedTicket, 
+            memories, 
+            memoriesLoading,
+            user,
+            getAuthHeader
+        }) {
+            const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+            return (
+                <div className="dashboard-layout">
+                    {/* Left Sidebar: Customer Tickets */}
+                    <div className="sidebar-tickets">
+                        <div className="sidebar-header">
+                            <div className="sidebar-header-row">
+                                <h2 className="sidebar-title">My Tickets</h2>
+                                <button className="new-ticket-btn" onClick={() => setIsCreateModalOpen(true)}>
+                                    ➕ New
+                                </button>
+                            </div>
+                            <p className="sidebar-subtitle">Open a new request, revisit past conversations, and track progress from one place.</p>
+                            <div className="sidebar-metrics">
+                                <div className="sidebar-metric">
+                                    <div className="sidebar-metric-value">{tickets.length}</div>
+                                    <div className="sidebar-metric-label">Total tickets</div>
+                                </div>
+                                <div className="sidebar-metric">
+                                    <div className="sidebar-metric-value">{tickets.filter(ticket => ticket.status === 'OPEN').length}</div>
+                                    <div className="sidebar-metric-label">Open tickets</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="ticket-list">
+                            {tickets.length === 0 ? (
+                                <div className="empty-tickets-msg dashboard-empty-state">
+                                    <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>📥</span>
+                                    <span>No tickets created yet. Feel free to open a support request.</span>
+                                </div>
+                            ) : (
+                                tickets.map(ticket => (
+                                    <button 
+                                        key={ticket.id} 
+                                        className={`ticket-item ${selectedTicketId === ticket.id ? 'active' : ''}`}
+                                        onClick={() => setSelectedTicketId(ticket.id)}
+                                    >
+                                        <div className="ticket-item-header">
+                                            <span className="ticket-subject">{ticket.subject}</span>
+                                            <span className={`status-badge ${ticket.status.toLowerCase()}`}>
+                                                {ticket.status}
+                                            </span>
+                                        </div>
+                                        <div className="ticket-meta">
+                                            <span>#{ticket.id}</span>
+                                            <span>{new Date(ticket.createdAt).toLocaleDateString()}</span>
+                                        </div>
+                                    </button>
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Chat viewport */}
+                    <ChatWindow 
+                        selectedTicket={selectedTicket} 
+                        getAuthHeader={getAuthHeader}
+                        fetchSelectedTicket={fetchSelectedTicket}
+                        fetchTickets={fetchTickets}
+                        role="CUSTOMER"
+                    />
+
+                    {/* Cognee Memory Sidebar */}
+                    <MemoryPanel 
+                        memories={memories} 
+                        loading={memoriesLoading}
+                        title="What we remember about you"
+                        subtitle="These details are extracted and synchronized automatically from your chat history using Cognee AI memory graph."
+                    />
+
+                    {/* New Ticket Modal */}
+                    {isCreateModalOpen && (
+                        <NewTicketModal 
+                            isOpen={isCreateModalOpen} 
+                            onClose={() => setIsCreateModalOpen(false)}
+                            getAuthHeader={getAuthHeader}
+                            fetchTickets={fetchTickets}
+                            setSelectedTicketId={setSelectedTicketId}
+                        />
+                    )}
+                </div>
+            );
+        }
+
+        // Support Agent Dashboard Portal
+        function AgentDashboard({ 
+            tickets, 
+            selectedTicketId, 
+            setSelectedTicketId, 
+            selectedTicket, 
+            fetchTickets, 
+            fetchSelectedTicket, 
+            memories, 
+            memoriesLoading,
+            getAuthHeader
+        }) {
+            const handleResolveTicket = async (resolution) => {
+                if (!selectedTicket) return;
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/tickets/${selectedTicket.id}/resolve`, {
+                        method: 'PUT',
+                        headers: getAuthHeader(),
+                        body: JSON.stringify({ resolution })
+                    });
+                    if (response.ok) {
+                        await fetch(`${API_BASE_URL}/api/tickets/${selectedTicket.id}/messages`, {
+                            method: 'POST',
+                            headers: getAuthHeader(),
+                            body: JSON.stringify({ content: `✅ Ticket resolved: ${resolution}` })
+                        });
+                        fetchSelectedTicket(selectedTicket.id);
+                        fetchTickets();
+                    } else {
+                        const errData = await response.json().catch(() => ({}));
+                        alert(errData.message || "Error resolving ticket");
+                    }
+                } catch (err) {
+                    console.error("Resolve ticket failed:", err);
+                    alert("Resolve ticket failed: " + err.message);
+                }
+            };
+
+            return (
+                <div className="dashboard-layout agent-layout">
+                    {/* Left Sidebar: All Tickets */}
+                    <div className="sidebar-tickets">
+                        <div className="sidebar-header">
+                            <div className="sidebar-header-row">
+                                <h2 className="sidebar-title">All Tickets</h2>
+                                <span className="status-badge" style={{ backgroundColor: 'var(--border-color)', color: 'var(--primary-color)' }}>
+                                    {tickets.length} total
+                                </span>
+                            </div>
+                            <p className="sidebar-subtitle">Monitor the queue, jump into a live conversation, and resolve issues with context.</p>
+                            <div className="sidebar-metrics">
+                                <div className="sidebar-metric">
+                                    <div className="sidebar-metric-value">{tickets.filter(ticket => ticket.status === 'OPEN').length}</div>
+                                    <div className="sidebar-metric-label">Waiting</div>
+                                </div>
+                                <div className="sidebar-metric">
+                                    <div className="sidebar-metric-value">{tickets.filter(ticket => ticket.status === 'RESOLVED').length}</div>
+                                    <div className="sidebar-metric-label">Resolved</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="ticket-list">
+                            {tickets.length === 0 ? (
+                                <div className="empty-tickets-msg dashboard-empty-state">
+                                    <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>✅</span>
+                                    <span>Inbox is clear. No active tickets.</span>
+                                </div>
+                            ) : (
+                                tickets.map(ticket => (
+                                    <button 
+                                        key={ticket.id} 
+                                        className={`ticket-item ${selectedTicketId === ticket.id ? 'active' : ''}`}
+                                        onClick={() => setSelectedTicketId(ticket.id)}
+                                    >
+                                        <div className="ticket-item-header">
+                                            <span className="ticket-subject">{ticket.subject}</span>
+                                            <span className={`status-badge ${ticket.status.toLowerCase()}`}>
+                                                {ticket.status}
+                                            </span>
+                                        </div>
+                                        <div className="ticket-meta">
+                                            <span>Cust ID: #{ticket.customerId}</span>
+                                            <span>#{ticket.id}</span>
+                                        </div>
+                                    </button>
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Chat viewport */}
+                    <ChatWindow 
+                        selectedTicket={selectedTicket} 
+                        getAuthHeader={getAuthHeader}
+                        fetchSelectedTicket={fetchSelectedTicket}
+                        fetchTickets={fetchTickets}
+                        role="AGENT"
+                        onResolve={handleResolveTicket}
+                    />
+
+                    {/* Cognee Memory Sidebar (Shows selected customer memory) */}
+                    <MemoryPanel 
+                        memories={memories} 
+                        loading={memoriesLoading}
+                        title="User Memory Profile"
+                        subtitle={selectedTicket ? `Showing retrieved AI memory context for Customer #${selectedTicket.customerId}.` : "Select a ticket to retrieve Cognee Memory context."}
+                    />
+                </div>
+            );
+        }
+
+        // Shared Chat Viewport and Input Component
+        function ChatWindow({ selectedTicket, getAuthHeader, fetchSelectedTicket, fetchTickets, role, onResolve }) {
+            const [messageContent, setMessageContent] = useState('');
+            const [sending, setSending] = useState(false);
+            const [isResolveModalOpen, setIsResolveModalOpen] = useState(false);
+            const bottomRef = useRef(null);
+
+            // Keep the latest message in view when the thread updates.
+            useEffect(() => {
+                if (bottomRef.current) {
+                    bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }
+            }, [selectedTicket?.messages]);
+
+            const handleSendMessage = async (e) => {
+                e.preventDefault();
+                if (!messageContent.trim() || !selectedTicket || sending) return;
+
+                setSending(true);
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/tickets/${selectedTicket.id}/messages`, {
+                        method: 'POST',
+                        headers: getAuthHeader(),
+                        body: JSON.stringify({ content: messageContent })
+                    });
+                    
+                    if (response.ok) {
+                        setMessageContent('');
+                        fetchSelectedTicket(selectedTicket.id);
+                        fetchTickets();
+                    } else {
+                        console.error("Message delivery failed");
+                    }
+                } catch (err) {
+                    console.error("Error sending message:", err);
+                } finally {
+                    setSending(false);
+                }
+            };
+
+            if (!selectedTicket) {
+                return (
+                    <div className="chat-container">
+                        <div className="chat-welcome">
+                            <Logo tagline={false} height={60} className="chat-welcome-icon" />
+                            <div className="chat-welcome-text">
+                                <h3>Welcome to OnceTold Support</h3>
+                                <p>Select a conversations thread from the list to start chatting.</p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            const isResolved = selectedTicket.status === 'RESOLVED';
+
+            return (
+                <div className="chat-container">
+                    <div className="chat-header">
+                        <div className="chat-header-info">
+                            <div className="chat-header-kicker">Live conversation</div>
+                            <h3 className="chat-header-subject">{selectedTicket.subject}</h3>
+                            <div className="chat-header-meta">
+                                <span>Ticket #{selectedTicket.id}</span>
+                                <span>•</span>
+                                <span className={`status-badge ${selectedTicket.status.toLowerCase()}`}>
+                                    {selectedTicket.status}
+                                </span>
+                                <span className="chat-summary-chip">{selectedTicket.messages?.length || 0} messages</span>
+                            </div>
+                        </div>
+                        {role === 'AGENT' && selectedTicket.status === 'OPEN' && (
+                            <button 
+                                className="resolve-action-btn" 
+                                onClick={() => setIsResolveModalOpen(true)}
+                            >
+                                ✅ Resolve Ticket
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="chat-viewport">
+                        {selectedTicket.messages && selectedTicket.messages.length === 0 ? (
+                            <div className="chat-welcome">
+                                <div className="chat-empty-card">
+                                    <div style={{ textAlign: 'center' }}>
+                                        <span style={{ fontSize: '2.5rem', opacity: 0.35 }}>💬</span>
+                                        <h4>This conversation is ready to begin</h4>
+                                        <p>
+                                            Send the first message to start the thread. OnceTold will keep the conversation
+                                            organized, remember context, and surface the important details automatically.
+                                        </p>
+                                    </div>
+                                    <div className="chat-empty-points">
+                                        <div className="chat-empty-point"><span>1</span><div>Use the input box below to open the conversation.</div></div>
+                                        <div className="chat-empty-point"><span>2</span><div>Keep messages short and specific for faster follow-up.</div></div>
+                                        <div className="chat-empty-point"><span>3</span><div>Resolved tickets stay visible here for reference.</div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                {selectedTicket.messages.map((msg, index) => {
+                                    const isCustomer = msg.sender === 'CUSTOMER';
+                                    const isBot = msg.sender === 'BOT';
+                                    const isAgent = msg.sender === 'AGENT';
+                                    
+                                    let bubbleClass = 'customer-bubble';
+                                    let rowClass = 'customer-row';
+                                    
+                                    if (isBot) {
+                                        bubbleClass = 'bot-bubble';
+                                        rowClass = 'bot-row';
+                                    } else if (isAgent) {
+                                        bubbleClass = 'agent-bubble';
+                                        rowClass = 'agent-row';
+                                    }
+
+                                    return (
+                                        <div key={msg.id || index} className={`message-row ${rowClass}`}>
+                                            <div className={`message-bubble ${bubbleClass} animate-message`}>
+                                                <div>
+                                                    {isBot && <span style={{ marginRight: '0.4rem' }}>🤖</span>}
+                                                    {msg.content}
+                                                </div>
+                                                <div className="message-meta">
+                                                    <span>{isBot ? 'OnceTold Bot' : isAgent ? 'Agent' : 'You'}</span>
+                                                    <span>•</span>
+                                                    <span>{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                <div ref={bottomRef} />
+                            </>
+                        )}
+                    </div>
+
+                    <div className="chat-input-area">
+                        {isResolved ? (
+                            <div className="resolved-indicator">
+                                <span style={{ marginRight: '0.4rem' }}>🔒</span>
+                                This ticket has been marked as resolved and closed.
+                            </div>
+                        ) : (
+                            <form className="chat-input-form" onSubmit={handleSendMessage}>
+                                <input 
+                                    type="text" 
+                                    className="chat-input-box"
+                                    value={messageContent}
+                                    onChange={(e) => setMessageContent(e.target.value)}
+                                    placeholder="Type your message here..."
+                                    disabled={sending}
+                                    autoFocus
+                                />
+                                <button className="chat-send-btn" type="submit" disabled={!messageContent.trim() || sending}>
+                                    {sending ? (
+                                        <div className="spinner-accent"></div>
+                                    ) : (
+                                        <span>Send 📤</span>
+                                    )}
+                                </button>
+                            </form>
+                        )}
+                    </div>
+
+                    {isResolveModalOpen && (
+                        <ResolveTicketModal 
+                            isOpen={isResolveModalOpen}
+                            onClose={() => setIsResolveModalOpen(false)}
+                            onResolve={onResolve}
+                            ticketId={selectedTicket.id}
+                        />
+                    )}
+                </div>
+            );
+        }
+
+        // Cognee Memory Sidebar Component
+        function MemoryPanel({ memories, loading, title, subtitle }) {
+            const hasRecalledData = memories && memories.length > 0;
+
+            return (
+                <div className={`sidebar-memory ${hasRecalledData ? 'memory-glow' : ''}`}>
+                    <div className="memory-header">
+                        <div className="memory-header-row">
+                            <h3 className="memory-title">
+                                <span style={{ marginRight: '0.4rem' }}>🧠</span>
+                                {title}
+                            </h3>
+                            <span className="memory-context-pill">Cognee</span>
+                        </div>
+                        <p className="memory-subtitle">{subtitle}</p>
+                    </div>
+
+                    {loading ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem', gap: '1rem' }}>
+                            <div className="spinner"></div>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>🧠 Recalling your history...</span>
+                        </div>
+                    ) : !hasRecalledData ? (
+                        <div className="memory-item-empty">
+                            <span style={{ fontSize: '2.5rem', opacity: 0.3 }}>✨</span>
+                            <span>No memories recalled yet. As you talk, OnceTold will automatically extract and build memory context here.</span>
+                        </div>
+                    ) : (
+                        <div className="memory-list">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>RECALLED KEY FACTS</span>
+                                <span className="memory-badge">Cognee</span>
+                            </div>
+                            {memories.map((memory, index) => {
+                                const raw = typeof memory === 'string' ? memory : JSON.stringify(memory);
+                                const answerMatch = raw.match(/answer='([^']+)'/);
+                                const timeMatch   = raw.match(/time='([^']+)'/);
+
+                                if (answerMatch) {
+                                    const answerText = answerMatch[1];
+                                    let dateLabel = null;
+                                    if (timeMatch) {
+                                        try {
+                                            dateLabel = new Date(timeMatch[1]).toLocaleString([], {
+                                                year: 'numeric', month: 'short', day: 'numeric',
+                                                hour: '2-digit', minute: '2-digit'
+                                            });
+                                        } catch (_) {
+                                            dateLabel = timeMatch[1];
+                                        }
+                                    }
+                                    return (
+                                        <div key={index} className="memory-item" style={{
+                                            background: '#E4E3F5',
+                                            borderLeft: '3px solid #2B2D6E',
+                                            color: '#2B2D6E'
+                                        }}>
+                                            {dateLabel && (
+                                                <div style={{
+                                                    fontSize: '0.7rem',
+                                                    color: '#5A5A6E',
+                                                    marginBottom: '0.35rem',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.3rem'
+                                                }}>
+                                                    <span>🕐</span>
+                                                    <span>{dateLabel}</span>
+                                                </div>
+                                            )}
+                                            <div>{answerText}</div>
+                                        </div>
+                                    );
+                                }
+
+                                // Fallback: truncate raw string to 150 chars
+                                const truncated = raw.length > 150 ? raw.slice(0, 150) + '...' : raw;
+                                return (
+                                    <div key={index} className="memory-item" style={{
+                                        background: '#E4E3F5',
+                                        borderLeft: '3px solid #2B2D6E',
+                                        color: '#2B2D6E'
+                                    }}>
+                                        {truncated}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // New Ticket Modal Form Component
+        function NewTicketModal({ isOpen, onClose, getAuthHeader, fetchTickets, setSelectedTicketId }) {
+            const [subject, setSubject] = useState('');
+            const [saving, setSaving] = useState(false);
+            const [error, setError] = useState('');
+
+            const handleCreate = async (e) => {
+                e.preventDefault();
+                if (!subject.trim()) return;
+
+                setSaving(true);
+                setError('');
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/tickets`, {
+                        method: 'POST',
+                        headers: getAuthHeader(),
+                        body: JSON.stringify({ subject: subject.trim() })
+                    });
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        fetchTickets();
+                        if (data.id) {
+                            setSelectedTicketId(data.id);
+                        }
+                        onClose();
+                    } else {
+                        setError(data.message || 'Failed to create ticket');
+                    }
+                } catch (err) {
+                    setError('Connection to backend failed');
+                    console.error(err);
+                } finally {
+                    setSaving(false);
+                }
+            };
+
+            return (
+                <div className="modal-overlay">
+                    <div className="modal-card">
+                        <div className="modal-header">
+                            <h3 className="modal-title">Open New Support Ticket</h3>
+                            <button className="modal-close" onClick={onClose} disabled={saving}>
+                                ✕
+                            </button>
+                        </div>
+
+                        {error && (
+                            <div className="error-banner" style={{ margin: '0 0 1rem 0' }}>
+                                <span style={{ marginRight: '0.4rem' }}>⚠️</span>
+                                <span>{error}</span>
+                            </div>
+                        )}
+
+                        <form onSubmit={handleCreate}>
+                            <div className="form-group">
+                                <label className="form-label">Subject / Issue Title</label>
+                                <input 
+                                    type="text" 
+                                    className="form-input"
+                                    value={subject}
+                                    onChange={(e) => setSubject(e.target.value)}
+                                    placeholder="Briefly describe what you need help with"
+                                    disabled={saving}
+                                    required
+                                    autoFocus
+                                />
+                            </div>
+
+                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+                                A OnceTold AI agent will automatically summarize and remember your interaction details to assist you faster next time.
+                            </p>
+
+                            <div className="modal-actions">
+                                <button className="cancel-btn" type="button" onClick={onClose} disabled={saving}>
+                                    Cancel
+                                </button>
+                                <button className="submit-btn" type="submit" style={{ width: 'auto', marginTop: 0 }} disabled={saving || !subject.trim()}>
+                                    {saving ? <div className="spinner-accent"></div> : 'Create Ticket'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        }
+
+        // Resolve Ticket Modal Form Component
+        function ResolveTicketModal({ isOpen, onClose, onResolve, ticketId }) {
+            const [resolution, setResolution] = useState('');
+            const [saving, setSaving] = useState(false);
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                if (!resolution.trim()) return;
+
+                setSaving(true);
+                try {
+                    await onResolve(resolution.trim());
+                    onClose();
+                } catch (err) {
+                    console.error(err);
+                } finally {
+                    setSaving(false);
+                }
+            };
+
+            return (
+                <div className="modal-overlay">
+                    <div className="modal-card">
+                        <div className="modal-header">
+                            <h3 className="modal-title">Resolve Ticket #{ticketId}</h3>
+                            <button className="modal-close" onClick={onClose} disabled={saving}>
+                                ✕
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label className="form-label">Resolution Summary</label>
+                                <textarea 
+                                    className="form-input"
+                                    value={resolution}
+                                    onChange={(e) => setResolution(e.target.value)}
+                                    placeholder="Type a summary of how this ticket was resolved..."
+                                    disabled={saving}
+                                    required
+                                    rows={4}
+                                    style={{ resize: 'vertical', fontFamily: 'inherit' }}
+                                    autoFocus
+                                />
+                            </div>
+
+                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+                                Resolving this ticket will finalize the conversation and trigger AI memory updates.
+                            </p>
+
+                            <div className="modal-actions">
+                                <button className="cancel-btn" type="button" onClick={onClose} disabled={saving}>
+                                    Cancel
+                                </button>
+                                <button className="submit-btn" type="submit" style={{ width: 'auto', marginTop: 0 }} disabled={saving || !resolution.trim()}>
+                                    {saving ? <div className="spinner-accent"></div> : 'Resolve Ticket'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        }
+
+        // Render React DOM App
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
