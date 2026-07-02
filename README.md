@@ -109,7 +109,7 @@ Run the companion Python FastAPI service on `http://localhost:8000` if you want 
 
 ## AI Disclosure
 
-This project was built with assistance from AI coding tools (Antigravity, GitHub Copilot, Claude by Anthropic) as permitted by hackathon rules.
+This project was built with assistance from AI coding tools (GitHub Copilot) as permitted by hackathon rules.
 
 ---
 
