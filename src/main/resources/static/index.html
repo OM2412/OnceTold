@@ -1718,11 +1718,10 @@
                     if (response.ok) {
                         const data = await response.json();
                         setSelectedTicket(data);
-                        // If selectedTicket changes, trigger memory recall for that customer
-                        const customerIdToRecall = data.customerId;
-                        if (customerIdToRecall) {
-                            fetchMemories(customerIdToRecall);
-                        }
+                        // Memory recall is triggered by the useEffect below (keyed on
+                        // the stable customer id), not here — this function runs every
+                        // 4s via polling and was previously calling fetchMemories on
+                        // every single cycle, hammering the recall endpoint constantly.
                     }
                 } catch (err) {
                     console.error("Error fetching ticket detail:", err);
