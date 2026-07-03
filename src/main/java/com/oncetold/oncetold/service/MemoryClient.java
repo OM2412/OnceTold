@@ -2,6 +2,7 @@ package com.oncetold.oncetold.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -19,18 +20,20 @@ public class MemoryClient {
     private final RestClient restClient;
 
     public MemoryClient(@Value("${memory.service.base-url}") String baseUrl) {
+        // Cognee Cloud's real graph completion queries can legitimately take up to
+        // ~70s. Without an explicit timeout here, RestClient's underlying HTTP
+        // client defaults to a 10s read timeout, silently killing every recall/
+        // remember call before Cognee finishes — this was the actual bug.
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(10_000);
+        factory.setReadTimeout(90_000);
+
         this.restClient = RestClient.builder()
                 .baseUrl(baseUrl)
+                .requestFactory(factory)
                 .build();
     }
 
-    /**
-     * POST /remember — stores a ticket message into Cognee session memory.
-     *
-     * @param customerId the customer's user ID (as string, used as Cognee namespace)
-     * @param ticketId   the ticket's ID (as string)
-     * @param content    the message content to remember
-     */
     public void remember(String customerId, String ticketId, String content) {
         try {
             restClient.post()
@@ -44,12 +47,6 @@ public class MemoryClient {
         }
     }
 
-    /**
-     * GET /recall — returns relevant prior memory for a customer.
-     *
-     * @param customerId the customer's user ID
-     * @return the recalled memory string, or null if unavailable
-     */
     public String recall(String customerId) {
         try {
             String result = restClient.get()
@@ -67,13 +64,6 @@ public class MemoryClient {
         }
     }
 
-    /**
-     * POST /improve — promotes session memory to permanent graph memory on ticket resolve.
-     *
-     * @param customerId the customer's user ID
-     * @param ticketId   the ticket's ID (as string)
-     * @param resolution a description of how the ticket was resolved
-     */
     public void improve(String customerId, String ticketId, String resolution) {
         try {
             restClient.post()
@@ -87,11 +77,6 @@ public class MemoryClient {
         }
     }
 
-    /**
-     * POST /forget — deletes a customer's entire memory dataset.
-     *
-     * @param customerId the customer's user ID
-     */
     public void forget(String customerId) {
         try {
             restClient.post()
