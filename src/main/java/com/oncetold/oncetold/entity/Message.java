@@ -1,4 +1,4 @@
-﻿package com.oncetold.oncetold.entity;
+package com.oncetold.oncetold.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

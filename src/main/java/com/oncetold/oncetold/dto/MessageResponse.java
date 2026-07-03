@@ -1,4 +1,4 @@
-﻿package com.oncetold.oncetold.dto;
+package com.oncetold.oncetold.dto;
 
 import com.oncetold.oncetold.entity.SenderType;
 import lombok.Builder;

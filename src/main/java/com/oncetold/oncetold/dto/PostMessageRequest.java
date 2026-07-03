@@ -1,4 +1,4 @@
-﻿package com.oncetold.oncetold.dto;
+package com.oncetold.oncetold.dto;
 
 import lombok.Data;
 

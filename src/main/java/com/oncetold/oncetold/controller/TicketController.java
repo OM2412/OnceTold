@@ -28,14 +28,14 @@ public class TicketController {
     private final TicketService ticketService;
     private final UserRepository userRepository;
 
-    // ── Resolve the UserDetails principal back to our User entity ─────────────
+    // â”€â”€ Resolve the UserDetails principal back to our User entity â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private User resolveUser(UserDetails principal) {
         return userRepository.findByEmail(principal.getUsername())
                 .orElseThrow(() -> new RuntimeException("Authenticated user not found in database"));
     }
 
-    // ── POST /api/tickets ─────────────────────────────────────────────────────
+    // â”€â”€ POST /api/tickets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Create a new ticket (CUSTOMER role recommended; AGENTs can too)
 
     @PostMapping
@@ -51,7 +51,7 @@ public class TicketController {
         }
     }
 
-    // ── GET /api/tickets ──────────────────────────────────────────────────────
+    // â”€â”€ GET /api/tickets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // CUSTOMER sees own tickets; AGENT sees all
 
     @GetMapping
@@ -61,7 +61,7 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.getTickets(user));
     }
 
-    // ── GET /api/tickets/{id} ─────────────────────────────────────────────────
+    // â”€â”€ GET /api/tickets/{id} â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Returns ticket + all messages
 
     @GetMapping("/{id}")
@@ -78,7 +78,7 @@ public class TicketController {
         }
     }
 
-    // ── POST /api/tickets/{id}/messages ──────────────────────────────────────
+    // â”€â”€ POST /api/tickets/{id}/messages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Post a message to an open ticket; also calls /remember on memory service
 
     @PostMapping("/{id}/messages")
@@ -101,7 +101,7 @@ public class TicketController {
         }
     }
 
-    // ── PUT /api/tickets/{id}/resolve ─────────────────────────────────────────
+    // â”€â”€ PUT /api/tickets/{id}/resolve â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // AGENT only (enforced in SecurityConfig); also calls /improve on memory service
 
     @PutMapping("/{id}/resolve")
@@ -119,7 +119,7 @@ public class TicketController {
         }
     }
 
-    // ── GET /api/tickets/all ──────────────────────────────────────────────────
+    // â”€â”€ GET /api/tickets/all â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // AGENT only (enforced in SecurityConfig) - returns all tickets
 
     @GetMapping("/all")
