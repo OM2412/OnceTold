@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1780,7 +1780,10 @@
                 if (idToRecall) {
                     fetchMemories(idToRecall);
                 }
-            }, [selectedTicket]);
+                // Depend on the stable id, not the whole object — fetchSelectedTicket's
+                // 4s poll creates a new selectedTicket object every cycle even when
+                // nothing changed, which was re-triggering recall every 4 seconds.
+            }, [selectedTicket && (selectedTicket.customerId || (user && user.userId))]);
 
             return (
                 <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
