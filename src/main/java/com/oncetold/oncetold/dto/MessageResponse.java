@@ -1,4 +1,4 @@
-package com.oncetold.oncetold.dto;
+﻿package com.oncetold.oncetold.dto;
 
 import com.oncetold.oncetold.entity.SenderType;
 import lombok.Builder;
@@ -13,5 +13,6 @@ public class MessageResponse {
     private Long ticketId;
     private SenderType sender;
     private String content;
+    private String imageData;
     private LocalDateTime createdAt;
 }

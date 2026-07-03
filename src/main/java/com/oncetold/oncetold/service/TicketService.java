@@ -84,6 +84,13 @@ public MessageResponse postMessage(Long ticketId, PostMessageRequest request, Us
         throw new IllegalStateException("Cannot post to a resolved ticket");
     }
 
+    boolean hasText = request.getContent() != null && !request.getContent().isBlank();
+    boolean hasImage = request.getImageData() != null && !request.getImageData().isBlank();
+
+    if (!hasText && !hasImage) {
+        throw new IllegalArgumentException("Message must contain text or an image");
+    }
+
     SenderType senderType = currentUser.getRole() == Role.AGENT
             ? SenderType.AGENT
             : SenderType.CUSTOMER;
@@ -91,15 +98,23 @@ public MessageResponse postMessage(Long ticketId, PostMessageRequest request, Us
     Message message = Message.builder()
             .ticketId(ticketId)
             .sender(senderType)
-            .content(request.getContent())
+            .content(hasText ? request.getContent() : "")
+            .imageData(hasImage ? request.getImageData() : null)
             .build();
     messageRepository.save(message);
+
+    // Never send raw base64 image data into Cognee or the LLM prompt — it's
+    // meaningless to both, wastes tokens/cost, and can blow past context
+    // limits. Substitute a short, human-readable placeholder instead.
+    String memorySafeText = hasImage
+            ? (hasText ? request.getContent() + " [image attached]" : "[Customer sent an image]")
+            : request.getContent();
 
     // Store in Cognee session memory
     memoryClient.remember(
             String.valueOf(ticket.getCustomerId()),
             String.valueOf(ticketId),
-            "[" + senderType + "] " + request.getContent()
+            "[" + senderType + "] " + memorySafeText
     );
 
     // Generate bot reply only for CUSTOMER messages
@@ -123,11 +138,12 @@ public MessageResponse postMessage(Long ticketId, PostMessageRequest request, Us
                 - If memories/history are empty, unavailable, or says "No previous history", warmly greet the customer and ask how you can help. Do NOT mention that no history exists or that this is their first time reaching out.
                 - If memories exist, naturally reference them in the conversation without saying "I recall our previous conversation" or "as we discussed before" — just use the context naturally.
                 - Never tell the customer you don't have their history.
+                - If the customer sent an image, acknowledge it naturally and ask for any details you need — you cannot see the image contents.
                 - Keep responses friendly, concise (under 100 words), and solution-focused.
                 """.formatted(
                     recalled != null && !recalled.trim().isEmpty() ? recalled : "No previous history",
                     ticket.getSubject(),
-                    request.getContent()
+                    memorySafeText
             );
 
             log.info("[Bot Reply] Invoking ChatClient prompt call...");
@@ -228,6 +244,7 @@ public MessageResponse postMessage(Long ticketId, PostMessageRequest request, Us
                 .ticketId(message.getTicketId())
                 .sender(message.getSender())
                 .content(message.getContent())
+                .imageData(message.getImageData())
                 .createdAt(message.getCreatedAt())
                 .build();
     }

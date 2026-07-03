@@ -1,4 +1,4 @@
-package com.oncetold.oncetold.entity;
+﻿package com.oncetold.oncetold.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -29,6 +29,10 @@ public class Message {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
+
+    @Lob
+    @Column(columnDefinition = "CLOB")
+    private String imageData;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
