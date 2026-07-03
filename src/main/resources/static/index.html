@@ -1634,6 +1634,7 @@
             const [selectedTicket, setSelectedTicket] = useState(null);
             const [memories, setMemories] = useState([]);
             const [memoriesLoading, setMemoriesLoading] = React.useState(false);
+            const [memoriesError, setMemoriesError] = React.useState('');
             const [errorMsg, setErrorMsg] = useState('');
             const [loading, setLoading] = useState(false);
 
@@ -1750,19 +1751,32 @@
             const fetchMemories = async (customerId) => {
                 if (!customerId) return;
                 setMemoriesLoading(true);
+                setMemoriesError('');
                 try {
+                    // Cognee's real graph queries can take up to ~70s — without an
+                    // explicit timeout here, a hung request left the spinner stuck
+                    // forever with no feedback to the user.
                     const response = await fetch(`${COGNEE_BASE_URL}/recall?customer_id=${customerId}&query=history`, {
-                        method: 'GET'
+                        method: 'GET',
+                        signal: AbortSignal.timeout(90000)
                     });
                     if (response.ok) {
                         const data = await response.json();
-                        // user specified format: { "customer_id": "1", "status": "recalled", "memories": [...] }
                         setMemories(data.memories || []);
+                        if (data.status && data.status.startsWith('cognee skipped')) {
+                            setMemoriesError('Memory service error: ' + data.status);
+                        }
                     } else {
+                        setMemoriesError(`Memory service returned status ${response.status}`);
                         console.warn("Cognee service recall returned error status code: " + response.status);
                     }
                 } catch (err) {
-                    console.warn("Cognee memory recall server is unavailable on port 8000.", err);
+                    if (err.name === 'TimeoutError' || err.name === 'AbortError') {
+                        setMemoriesError('Memory recall timed out after 90s. The Cognee service may be slow or unreachable.');
+                    } else {
+                        setMemoriesError('Could not reach the memory service: ' + err.message);
+                    }
+                    console.warn("Cognee memory recall failed.", err);
                 } finally {
                     setMemoriesLoading(false);
                 }
@@ -1830,6 +1844,7 @@
                                 fetchSelectedTicket={fetchSelectedTicket}
                                 memories={memories}
                                 memoriesLoading={memoriesLoading}
+                                memoriesError={memoriesError}
                                 user={user}
                                 getAuthHeader={getAuthHeader}
                             />
@@ -1843,6 +1858,7 @@
                                 fetchSelectedTicket={fetchSelectedTicket}
                                 memories={memories}
                                 memoriesLoading={memoriesLoading}
+                                memoriesError={memoriesError}
                                 getAuthHeader={getAuthHeader}
                             />
                         )}
@@ -2208,6 +2224,7 @@
                     <MemoryPanel 
                         memories={memories} 
                         loading={memoriesLoading}
+                        error={memoriesError}
                         title="What we remember about you"
                         subtitle="These details are extracted and synchronized automatically from your chat history using Cognee AI memory graph."
                     />
@@ -2236,6 +2253,7 @@
             fetchSelectedTicket, 
             memories, 
             memoriesLoading,
+            memoriesError,
             getAuthHeader
         }) {
             const handleResolveTicket = async (resolution) => {
@@ -2331,6 +2349,7 @@
                     <MemoryPanel 
                         memories={memories} 
                         loading={memoriesLoading}
+                        error={memoriesError}
                         title="User Memory Profile"
                         subtitle={selectedTicket ? `Showing retrieved AI memory context for Customer #${selectedTicket.customerId}.` : "Select a ticket to retrieve Cognee Memory context."}
                     />
@@ -2601,7 +2620,7 @@
         }
 
         // Cognee Memory Sidebar Component
-        function MemoryPanel({ memories, loading, title, subtitle }) {
+        function MemoryPanel({ memories, loading, error, title, subtitle }) {
             const hasRecalledData = memories && memories.length > 0;
 
             return (
@@ -2621,6 +2640,11 @@
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem', gap: '1rem' }}>
                             <div className="spinner"></div>
                             <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>🧠 Recalling your history...</span>
+                        </div>
+                    ) : error ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', gap: '0.6rem', textAlign: 'center' }}>
+                            <span style={{ fontSize: '2rem' }}>⚠️</span>
+                            <span style={{ fontSize: '0.85rem', color: '#c0392b', fontWeight: 500 }}>{error}</span>
                         </div>
                     ) : !hasRecalledData ? (
                         <div className="memory-item-empty">
