@@ -47,6 +47,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/", "/index.html", "/static/**", "/favicon.ico", "/error").permitAll()
                 .requestMatchers(HttpMethod.PUT, "/api/tickets/*/resolve").hasRole("AGENT")
                 .requestMatchers("/api/tickets/all").hasRole("AGENT")
                 .anyRequest().authenticated()
