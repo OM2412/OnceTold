@@ -1756,9 +1756,11 @@
                     // Cognee's real graph queries can take up to ~70s — without an
                     // explicit timeout here, a hung request left the spinner stuck
                     // forever with no feedback to the user.
+                    // Python's own timeout to Cognee Cloud is 120s - this must be
+                    // longer than that, or the browser gives up before Python does.
                     const response = await fetch(`${COGNEE_BASE_URL}/recall?customer_id=${customerId}&query=history`, {
                         method: 'GET',
-                        signal: AbortSignal.timeout(90000)
+                        signal: AbortSignal.timeout(130000)
                     });
                     if (response.ok) {
                         const data = await response.json();
@@ -1772,7 +1774,7 @@
                     }
                 } catch (err) {
                     if (err.name === 'TimeoutError' || err.name === 'AbortError') {
-                        setMemoriesError('Memory recall timed out after 90s. The Cognee service may be slow or unreachable.');
+                        setMemoriesError('Memory recall timed out after 130s. The Cognee service may be slow or unreachable.');
                     } else {
                         setMemoriesError('Could not reach the memory service: ' + err.message);
                     }
