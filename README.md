@@ -99,7 +99,7 @@ Getting this reliably deployed surfaced some real, non-obvious bugs worth mentio
 
 ## AI Disclosure
 
-*[Add an accurate note here about which AI tools were used during development, per hackathon rules — e.g. Claude, GitHub Copilot, or others actually used.]*
+I used claude for suggetions like improvements in my project.
 
 ## Credits
 
