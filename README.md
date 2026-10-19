@@ -4,105 +4,100 @@
 
 *Hangover Hackathon submission — WeMakeDevs × Cognee*
 
-🔗 **Live Demo:** [oncetold-production.up.railway.app](https://oncetold-production.up.railway.app)
+**[Open the live demo](https://oncetold-hrma.onrender.com)**
 
----
+OnceTold is a customer-support prototype that recalls customer-scoped history before an AI reply and writes ticket resolutions back to a Cognee memory graph.
 
-## The Problem
+## Try it
 
-Every time a customer contacts support, they repeat themselves from scratch. No continuity exists between tickets — a returning customer with a known issue gets treated like a stranger. This costs customers time and forces agents to manually dig through old threads to reconstruct context, if those threads are even findable at all.
+Use fictional information only. Register a customer, create a ticket, and send a message. Register a separate support-agent account to review and resolve the ticket with a summary. Return as the same customer and open a related ticket to explore recalled history.
 
-## The Solution
+The public demo uses Render Free, Neon PostgreSQL, Groq and Cognee Cloud. A sleeping instance can take several minutes to start, and memory queries can be slow. Availability depends on the providers' free allowances and API quotas. This is a portfolio demonstration, not a production support system: the demo permits agent registration.
 
-OnceTold is a customer support ticketing platform where every conversation is stored as memory in **Cognee** — an AI memory graph — scoped per customer. When a customer opens a new ticket, the system automatically recalls their relevant history. When a ticket is resolved, that resolution is written back into permanent memory, so the *next* interaction — even months later — starts with full context instead of from zero.
+## How the memory loop works
 
-## Real World Example
+| Operation | Internal bridge endpoint | Purpose |
+| --- | --- | --- |
+| Remember | `POST /remember` | Add customer ticket messages to that customer's dataset |
+| Recall | `GET /recall` | Retrieve history for the AI prompt and memory panel |
+| Improve | `POST /improve` | Add an agent's resolution to the customer's graph |
+| Forget | `POST /forget` | Internal capability to remove a dataset; not scheduled or exposed as a user-facing control |
 
-Sarah contacts support in March about a double billing charge. The issue gets resolved, and the resolution is stored in Cognee's memory graph for her account.
+Writes run asynchronously after application data is saved. Recall is synchronous with a bounded timeout; if the memory provider fails or times out, the bot can respond without recalled history. Graph ingestion is eventually consistent, so a new fact may not appear immediately.
 
-In June, Sarah contacts support again about her account balance. Without Sarah mentioning March at all, the bot immediately references her prior billing issue and its resolution — saving Sarah from repeating herself and giving the agent full context instantly.
-
-## The Memory Loop
-
-| Step | Endpoint | When it happens |
-|---|---|---|
-| **Remember** | `POST /remember` | Every ticket message and every resolution is ingested into that customer's Cognee dataset |
-| **Recall** | `POST /recall` | On each new customer message, prior history is queried and injected into the AI's reply prompt |
-| **Improve** | `POST /remember` (resolution) | Ticket resolved → the agent's resolution is written back, permanently strengthening that customer's graph |
-| **Forget** | `POST /forget` | Available on-demand to delete a customer's dataset (not currently scheduled/automated) |
+The browser accesses memory through authenticated `GET /api/tickets/{id}/memory`. The backend checks ticket access and uses the ticket owner's persisted ID. A customer cannot select another customer's dataset by changing a browser-supplied customer ID.
 
 ## Architecture
 
-OnceTold runs as **two deployed services**:
+One Render Docker web service runs two processes:
 
-1. **Java Spring Boot backend** — serves the React frontend directly from the same app, handles auth, tickets, and orchestrates the AI bot reply flow
-2. **Python FastAPI microservice** — bridges the backend to **Cognee Cloud's REST API**, keeping all memory-graph logic isolated from the main app
+- Java 21 / Spring Boot serves the React interface, authentication, tickets and AI orchestration.
+- A packaged FastAPI bridge listens only on `127.0.0.1:8000` and calls Cognee Cloud.
 
-We deliberately chose **Cognee Cloud** over self-hosting the local `cognee` Python library — this removes the need to manage any persistent storage or infrastructure for the memory layer itself; Cognee Cloud handles that entirely.
-
-### Tech Stack
+Only the Java HTTP port is public. Application records live in a dedicated Neon PostgreSQL database. A stable, deployment-specific Cognee dataset prefix separates this fresh database's customer IDs from the previous installation.
 
 | Layer | Technology |
-|---|---|
-| Backend | Java 21, Spring Boot 3.x, Spring Security + JWT |
-| AI Orchestration | Spring AI (`ChatClient`) |
-| Memory Bridge | Python 3.11, FastAPI, `httpx` → Cognee Cloud REST API |
-| LLM Provider | Groq (`llama-3.1-8b-instant`) via OpenAI-compatible API |
-| Database | H2 — file-based on a persistent volume in production (Railway), in-memory for local dev |
-| Frontend | React (single-page, served from the Spring Boot backend, in-browser Babel) |
-| Deployment | Railway (two services, one project) |
+| --- | --- |
+| Backend | Java 21, Spring Boot 4.0.7, Spring Security, JWT |
+| AI orchestration | Spring AI 2.0.0 `ChatClient` |
+| Model | Groq OpenAI-compatible API, `openai/gpt-oss-20b` |
+| Memory | Python, FastAPI, httpx, Cognee Cloud |
+| Database | Neon PostgreSQL in the Render profile; H2 for local development |
+| Frontend | React SPA served by Spring Boot, in-browser Babel |
+| Hosting | Render Free Docker service |
 
-## Setup Instructions
+## Local setup
 
-### Prerequisites
-- Java 21+
-- Python 3.11+
-- Groq API key (free at [console.groq.com](https://console.groq.com))
-- Cognee Cloud API key + tenant URL
+Prerequisites: Java 21, Python 3, a Groq API key, and existing Cognee Cloud configuration.
 
-### 1. Clone both repos
 ```bash
 git clone https://github.com/OM2412/OnceTold.git
-git clone https://github.com/OM2412/OnceTold-Memory.git
-```
-
-### 2. Start the memory service (Python)
-```bash
-cd OnceTold-Memory
-pip install -r requirements.txt
-# Set COGNEE_API_KEY and COGNEE_BASE_URL as environment variables
-uvicorn main:app --reload --port 8000
-```
-
-### 3. Start the Java backend (also serves the frontend)
-```bash
 cd OnceTold
-./mvnw spring-boot:run
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -r deploy/memory/requirements.txt
 ```
-The full app — frontend included — is now available at `http://localhost:8080`.
 
-## Demo Flow
+Set `COGNEE_API_KEY`, `COGNEE_BASE_URL` and a unique `COGNEE_DATASET_PREFIX` in your shell, then start the packaged bridge:
 
-1. Register as **CUSTOMER** → create a ticket about a billing issue
-2. Chat with the AI bot → it responds using recalled context (or greets normally if there's no history yet)
-3. Log in as **AGENT** → view the ticket queue → resolve the ticket with a summary
-4. Log back in as **CUSTOMER** → open a second ticket about a related issue
-5. The bot references the prior context unprompted — this is OnceTold's memory loop working end-to-end
+```bash
+uvicorn main:app --app-dir deploy/memory --host 127.0.0.1 --port 8000
+```
 
-## What We Learned / Engineering Challenges
+In another terminal, set `SPRING_AI_OPENAI_API_KEY` to your Groq key and set a private `APP_JWT_SECRET` of at least 32 characters, then run:
 
-Getting this reliably deployed surfaced some real, non-obvious bugs worth mentioning:
-- A silent, unconfigured default HTTP timeout was cutting off memory calls at exactly 10 seconds with no visible error — only caught by inspecting actual network timing logs, not by reading error messages.
-- H2's default in-memory mode wiped all data on every Railway restart — fixed with a persistent volume and environment-driven datasource configuration.
-- A UTF-8 BOM character silently broke the Railway build despite compiling fine locally.
-- Balancing memory recall depth against response latency — Cognee's graph queries can take up to a minute for complex context, which required separating "fire-and-forget" memory writes from the one blocking recall call needed before the bot can reply.
+```bash
+sh mvnw spring-boot:run
+```
 
-## AI Disclosure
+Open `http://localhost:8080`. The default local H2 database is in memory and resets when the application restarts. Do not use the local defaults for a public deployment.
 
-I used claude for suggetions like improvements in my project.
+## Render deployment
+
+See [deploy/RENDER.md](deploy/RENDER.md) and [render.yaml](render.yaml) for the cloud profile, required environment variables and verification notes. Secrets belong in Render's environment settings, never in source control.
+
+The Render deployment uses PostgreSQL with TLS, a small connection pool, schema updates that fail startup on DDL errors, and a disabled H2 console. Both container processes stop if either exits.
+
+The previous Railway trial expired. This deployment starts with a new database; old Railway accounts and tickets were **not imported**.
+
+## Validation
+
+On 19 October 2026, the hosted Docker build passed four backend tests: the application context and three ticket-memory access tests covering owner access, cross-customer rejection and agent lookup of the ticket owner's memory.
+
+Hosted checks used fictional customer/agent accounts to exercise registration, login, ticket creation, an actual Groq reply, resolution, Cognee history retrieval and persistence across redeploys. These checks validate the tested scenario, not general response accuracy or an uptime guarantee.
+
+## Engineering notes
+
+- PostgreSQL requires `TEXT` instead of the original H2-specific `CLOB` column declaration for image data.
+- A fixed eight-second recall budget dropped useful cloud memory; the Render profile now allows a bounded 90-second read.
+- The retired Groq model was replaced with its documented successor.
+- The old browser-to-Railway memory URL was replaced with an authenticated backend route.
+- The bridge under `deploy/memory` originated in [OnceTold-Memory](https://github.com/OM2412/OnceTold-Memory); subsequent packaged changes are maintained here deliberately.
+
+## AI disclosure
+
+I used Claude for project suggestions and improvements. ChatGPT assisted with the Render/Neon migration, troubleshooting, validation and deployment documentation.
 
 ## Credits
 
-- **Cognee** — AI memory graph engine
-- **Groq** — LLM inference (free tier)
-- **Railway** — deployment platform
+Cognee — memory graphs · Groq — model inference · Render — application hosting · Neon — PostgreSQL

@@ -210,6 +210,12 @@ public MessageResponse postMessage(Long ticketId, PostMessageRequest request, Us
                 .toList();
     }
 
+    /** Resolve ownership from the ticket before calling the private bridge. */
+    public String recallTicketMemory(Long ticketId, User currentUser) {
+        Ticket ticket = findTicketAndCheckAccess(ticketId, currentUser);
+        return memoryClient.recallDetails(String.valueOf(ticket.getCustomerId()));
+    }
+
     // ── Helpers ────────────────────────────────────────────────────────────────
 
     private Ticket findTicketAndCheckAccess(Long ticketId, User currentUser) {
