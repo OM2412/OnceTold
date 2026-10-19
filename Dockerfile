@@ -3,7 +3,7 @@ WORKDIR /build
 COPY pom.xml ./
 RUN mvn -B -q dependency:go-offline
 COPY src ./src
-RUN mvn -B -DskipTests package
+RUN mvn -B -Dspring.ai.openai.api-key=build-only-placeholder package
 
 FROM eclipse-temurin:21-jre-jammy
 RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-venv ca-certificates \

@@ -86,6 +86,19 @@ public class MemoryClient {
         }
     }
 
+    /** Long recall for the authenticated UI; the bridge stays loopback-only. */
+    public String recallDetails(String customerId) {
+        String result = patientClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/recall")
+                        .queryParam("customer_id", customerId)
+                        .queryParam("query", "history").build())
+                .retrieve().body(String.class);
+        if (result == null || result.isBlank()) {
+            throw new IllegalStateException("Empty memory response");
+        }
+        return result;
+    }
+
     /**
      * POST /improve — fire-and-forget, does not block ticket resolution.
      */

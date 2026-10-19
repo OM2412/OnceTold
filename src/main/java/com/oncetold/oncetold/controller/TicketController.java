@@ -122,6 +122,29 @@ public class TicketController {
     // â”€â”€ GET /api/tickets/all â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // AGENT only (enforced in SecurityConfig) - returns all tickets
 
+
+    /** Authenticated, ticket-scoped UI proxy. Never trust a browser customer ID. */
+    @GetMapping("/{id}/memory")
+    public ResponseEntity<?> getTicketMemory(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails principal) {
+        try {
+            User user = resolveUser(principal);
+            String result = ticketService.recallTicketMemory(id, user);
+            return ResponseEntity.ok()
+                    .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .body(result);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (org.springframework.web.client.RestClientException | IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(
+                    java.util.Map.of("status", "unavailable", "memories", java.util.List.of(),
+                            "message", "The memory provider is unavailable. Try again later."));
+        }
+    }
+
     @GetMapping("/all")
     public ResponseEntity<List<TicketResponse>> getAllTickets(
             @AuthenticationPrincipal UserDetails principal) {

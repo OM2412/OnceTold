@@ -1542,7 +1542,6 @@
 
         // Configuration
         const API_BASE_URL = window.location.origin;
-        const COGNEE_BASE_URL = 'https://oncetold-memory-production.up.railway.app';
 
         // Inline SVGs as React Components for cleaner markup
         const Logo = ({ tagline = true, height = 50, className = "" }) => {
@@ -1748,8 +1747,8 @@
             }, [selectedTicketId]);
 
             // Fetch Cognee memory recall
-            const fetchMemories = async (customerId) => {
-                if (!customerId) return;
+            const fetchMemories = async (ticketId) => {
+                if (!ticketId) return;
                 setMemoriesLoading(true);
                 setMemoriesError('');
                 try {
@@ -1758,8 +1757,9 @@
                     // forever with no feedback to the user.
                     // Python's own timeout to Cognee Cloud is 120s - this must be
                     // longer than that, or the browser gives up before Python does.
-                    const response = await fetch(`${COGNEE_BASE_URL}/recall?customer_id=${customerId}&query=history`, {
+                    const response = await fetch(`${API_BASE_URL}/api/tickets/${ticketId}/memory`, {
                         method: 'GET',
+                        headers: getAuthHeader(),
                         signal: AbortSignal.timeout(130000)
                     });
                     if (response.ok) {
@@ -1784,21 +1784,17 @@
                 }
             };
 
-            // Fire memory recall whenever a ticket is selected, using the current user's id.
-            // For agents, selectedTicket.customerId is preferred; customers fall back to their own id.
+            // Fetch through the authenticated ticket route; the backend resolves ownership.
             useEffect(() => {
                 if (!selectedTicket) {
                     setMemories([]);
                     return;
                 }
-                const idToRecall = selectedTicket.customerId || (user && user.userId);
-                if (idToRecall) {
-                    fetchMemories(idToRecall);
-                }
+                fetchMemories(selectedTicket.id);
                 // Depend on the stable id, not the whole object — fetchSelectedTicket's
                 // 4s poll creates a new selectedTicket object every cycle even when
                 // nothing changed, which was re-triggering recall every 4 seconds.
-            }, [selectedTicket && (selectedTicket.customerId || (user && user.userId))]);
+            }, [selectedTicket && selectedTicket.id]);
 
             return (
                 <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
