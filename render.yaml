@@ -27,7 +27,7 @@ services:
       - key: SPRING_AI_OPENAI_BASE_URL
         value: https://api.groq.com/openai/v1
       - key: SPRING_AI_OPENAI_MODEL
-        value: llama-3.1-8b-instant
+        value: openai/gpt-oss-20b
       - key: COGNEE_API_KEY
         sync: false
       - key: COGNEE_BASE_URL
