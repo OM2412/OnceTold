@@ -1,7 +1,9 @@
 # OnceTold migration to Render
 
-Prepared for a free portfolio demonstration. This configuration has not yet been
-built on Render or validated against a live PostgreSQL/Cognee account.
+Prepared for a free portfolio demonstration. Render successfully built the Docker image on 19 October 2026 at commit
+ab187cdfdc0ea1573328dcff46d8757d86365246. Runtime deployment remains blocked
+because PostgreSQL connection settings and the application secrets are missing.
+Live PostgreSQL/Cognee workflows have not been validated.
 
 ## Layout
 
@@ -56,10 +58,15 @@ Create the free Docker service using render.yaml and its listed branch. Review
 the Free plan before creation. Do not add paid disks or automatic paid upgrades.
 After merge, update the blueprint branch to main deliberately.
 
-The local environment currently lacks Java 21/Maven/Docker, so a container build
-has not been run. The Docker build runs Maven packaging and skips the existing
-context-load test, which requires application configuration. Do not interpret
-that as a passed backend test suite.
+The local environment lacks Java 21/Maven/Docker, but Render completed Maven
+packaging and Docker image creation successfully on 19 October 2026. The Docker
+build skips the existing context-load test, which requires application
+configuration. Do not interpret packaging success as a passed backend test suite.
+
+Created service: https://dashboard.render.com/web/srv-dbb1fmeq1p3s73dg9is0
+Deployment dep-dbb1fneq1p3s73dg9mr0 ended update_failed: the startup guard
+reported SPRING_DATASOURCE_URL missing. The assigned public URL is not a working
+demo yet. No paid compute or database was provisioned.
 
 Before changing the portfolio from Hosting paused:
 - Confirm the container builds and the root homepage opens.
