@@ -1,0 +1,36 @@
+# No database or paid compute is created by this blueprint.
+services:
+  - type: web
+    name: oncetold
+    runtime: docker
+    repo: https://github.com/OM2412/OnceTold
+    branch: deploy/render-migration-20261019
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: APP_CORS_ORIGINS
+        value: http://localhost:3000
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: APP_JWT_SECRET
+        sync: false
+      - key: SPRING_AI_OPENAI_API_KEY
+        sync: false
+      - key: SPRING_AI_OPENAI_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: SPRING_AI_OPENAI_MODEL
+        value: llama-3.1-8b-instant
+      - key: COGNEE_API_KEY
+        sync: false
+      - key: COGNEE_BASE_URL
+        sync: false
+      - key: COGNEE_DATASET_PREFIX
+        sync: false
