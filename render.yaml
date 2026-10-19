@@ -4,7 +4,7 @@ services:
     name: oncetold
     runtime: docker
     repo: https://github.com/OM2412/OnceTold
-    branch: deploy/render-migration-20261019
+    branch: main
     plan: free
     region: singapore
     dockerfilePath: ./Dockerfile
