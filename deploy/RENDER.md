@@ -51,9 +51,29 @@ Fictional hosted QA verified customer and agent registration/login, ticket creat
 
 This is a public portfolio demonstration. Agent registration is open, so use fictional data only. No production-security or uptime guarantee is implied.
 
-Render Free services sleep after inactivity, share monthly instance hours with other workspace services, and have ephemeral local files. Cold starts can take several minutes. Neon and external AI quotas also apply. No paid compute, paid database, disk or keepalive monitor was added.
+Render Free services sleep after inactivity, share monthly instance hours with other workspace services, and have ephemeral local files. Cold starts can take several minutes. Neon and external AI quotas also apply. No paid compute, paid database or disk was added.
 
 References:
 - https://render.com/docs/free
 - https://render.com/docs/blueprint-spec
 - https://console.groq.com/docs/deprecations
+
+## Best-effort demo keep-alive
+
+The owner requested automatic wake-up checks on 19 October 2026.
+`.github/workflows/demo-keepalive.yml` requests the public portal every ten
+minutes and can also be started from GitHub Actions with **Run workflow**.
+It verifies the application's actual page title rather than accepting Render's
+temporary loading page as success. Retries are bounded. It does not log in,
+write database records, trigger a deploy, or call Groq/Cognee.
+
+GitHub Actions schedules can be delayed or dropped, and public repository
+schedules can be disabled after 60 days without repository activity. This
+reduces idle cold starts; it is not an always-on or uptime guarantee.
+Disable the workflow in GitHub Actions to stop the periodic requests.
+
+Render's 750 Free instance hours are shared by the whole workspace. Keeping
+one service running continuously uses roughly 720–744 hours per full month,
+leaving little for other services. Exhausting that allowance suspends Free
+services until the next month. Keep-alive does not bypass that allowance.
+Review total workspace usage before adding more always-on checks.

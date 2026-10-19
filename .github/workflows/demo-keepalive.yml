@@ -1,0 +1,45 @@
+name: OnceTold demo keep-alive
+
+on:
+  schedule:
+    # Offset from the hour to reduce contention. GitHub schedules are best-effort.
+    - cron: '7,17,27,37,47,57 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/demo-keepalive.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oncetold-demo-keepalive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Wake and verify the public portal without calling AI or writing data
+        shell: bash
+        run: |
+          set -euo pipefail
+          portal_file="$(mktemp)"
+          trap 'rm -f "$portal_file"' EXIT
+          for attempt in 1 2 3 4 5 6; do
+            if curl --fail --silent --show-error --location \
+              --connect-timeout 10 --max-time 45 \
+              --output "$portal_file" \
+              'https://oncetold-hrma.onrender.com/' \
+              && grep -Fq '<title>OnceTold - Support Portal</title>' "$portal_file"; then
+              printf 'OnceTold portal responded successfully.\n'
+              printf 'Public portal check passed at %s UTC.\n' "$(date -u '+%Y-%m-%d %H:%M:%S')" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            printf 'Portal is not ready yet (attempt %s/6).\n' "$attempt"
+            if [ "$attempt" -lt 6 ]; then sleep 10; fi
+          done
+          printf '::error::OnceTold did not serve its portal within the bounded wake-up window.\n'
+          exit 1
