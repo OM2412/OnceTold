@@ -1,14 +1,8 @@
 name: OnceTold demo keep-alive
 
+# Manual check only: scheduled pings keep free Render instances awake and exhaust shared hours.
 on:
-  schedule:
-    # Offset from the hour to reduce contention. GitHub schedules are best-effort.
-    - cron: '7,17,27,37,47,57 * * * *'
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/demo-keepalive.yml'
 
 permissions:
   contents: read
