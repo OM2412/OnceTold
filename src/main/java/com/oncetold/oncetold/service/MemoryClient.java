@@ -63,7 +63,7 @@ public class MemoryClient {
                     .toBodilessEntity();
             log.debug("Memory /remember completed for customer {} ticket {}", customerId, ticketId);
         } catch (Exception e) {
-            log.warn("Memory /remember failed for customer {} ticket {}: {}", customerId, ticketId, e.getMessage());
+            log.warn("Memory /remember unavailable for ticket {}", ticketId);
         }
     }
 
@@ -99,7 +99,7 @@ public class MemoryClient {
 
     /** Long recall for the authenticated UI; the bridge stays loopback-only. */
     public String recallDetails(String customerId) {
-        String result = patientClient.get()
+        String result = recallClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/recall")
                         .queryParam("customer_id", customerId)
                         .queryParam("query", "history").build())
@@ -123,7 +123,7 @@ public class MemoryClient {
                     .toBodilessEntity();
             log.debug("Memory /improve completed for customer {} ticket {}", customerId, ticketId);
         } catch (Exception e) {
-            log.warn("Memory /improve failed for customer {} ticket {}: {}", customerId, ticketId, e.getMessage());
+            log.warn("Memory /improve unavailable for ticket {}", ticketId);
         }
     }
 
@@ -140,7 +140,7 @@ public class MemoryClient {
                     .toBodilessEntity();
             log.debug("Memory /forget completed for customer {}", customerId);
         } catch (Exception e) {
-            log.warn("Memory /forget failed for customer {}: {}", customerId, e.getMessage());
+            log.warn("Memory /forget unavailable");
         }
     }
 }
