@@ -1541,7 +1541,11 @@
         const { useState, useEffect, useRef } = React;
 
         // Configuration
-        const API_BASE_URL = window.location.origin;
+        const API_BASE_URL = window.ONCETOLD_API_BASE_URL || (
+            ['localhost', '127.0.0.1'].includes(window.location.hostname) || window.location.hostname.endsWith('.onrender.com')
+                ? window.location.origin
+                : 'https://oncetold-y69f.onrender.com'
+        );
 
         // Inline SVGs as React Components for cleaner markup
         const Logo = ({ tagline = true, height = 50, className = "" }) => {
