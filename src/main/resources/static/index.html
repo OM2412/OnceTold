@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OnceTold - Support Portal</title>
+    <title>OnceTold | Customer Support Workspace</title>
     
     <!-- Google Fonts: Inter and Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,26 +21,26 @@
     <style>
         /* Base Reset & Variables */
         :root {
-            --primary-color: #2B2D6E;
-            --primary-light: #444793;
-            --primary-dark: #1E2050;
-            --accent-color: #E8A33D;
-            --accent-light: #F2BA65;
-            --accent-dark: #C9821B;
-            --bg-color: #F7F5F0;
+            --primary-color: #142C40;
+            --primary-light: #24536B;
+            --primary-dark: #0C1F30;
+            --accent-color: #0F998D;
+            --accent-light: #48C5B7;
+            --accent-dark: #087B74;
+            --bg-color: #F3F7FA;
             --card-bg: #FFFFFF;
-            --text-main: #2A2A35;
-            --text-muted: #6B6B7F;
-            --border-color: #E2E0D9;
+            --text-main: #182B3B;
+            --text-muted: #607385;
+            --border-color: #DFE8EE;
             --agent-green: #2D6E4E;
             --agent-green-light: #3D8F67;
             --danger-color: #C93B3B;
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
-            --shadow-md: 0 4px 12px rgba(43, 45, 110, 0.08);
-            --shadow-lg: 0 12px 24px rgba(43, 45, 110, 0.12);
-            --radius-sm: 6px;
-            --radius-md: 12px;
-            --radius-lg: 18px;
+            --shadow-sm: 0 1px 3px rgba(12,31,48,0.04);
+            --shadow-md: 0 8px 24px rgba(12,31,48,0.07);
+            --shadow-lg: 0 24px 48px rgba(12,31,48,0.11);
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
             --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -253,9 +253,9 @@
             padding: 2rem;
             overflow-y: auto;
             background:
-                radial-gradient(circle at top left, rgba(232, 163, 61, 0.14), transparent 28%),
-                radial-gradient(circle at bottom right, rgba(43, 45, 110, 0.16), transparent 32%),
-                linear-gradient(135deg, #f8f6f1 0%, #f3efe7 100%);
+                radial-gradient(circle at 7% 8%, rgba(15, 153, 141, 0.11), transparent 30%),
+                radial-gradient(circle at 98% 92%, rgba(20, 44, 64, 0.10), transparent 35%),
+                linear-gradient(135deg, #F8FBFC 0%, #EDF4F7 100%);
         }
 
         .auth-shell {
@@ -273,10 +273,10 @@
             border-radius: 28px;
             padding: 3rem;
             background:
-                linear-gradient(145deg, rgba(43, 45, 110, 0.98), rgba(30, 32, 80, 0.96)),
-                radial-gradient(circle at top right, rgba(232, 163, 61, 0.22), transparent 30%);
+                radial-gradient(ellipse at 110% 0%, rgba(72, 197, 183, 0.32), transparent 48%),
+                linear-gradient(145deg, #183A4D 0%, #0B2031 100%);
             color: #ffffff;
-            box-shadow: 0 24px 50px rgba(30, 32, 80, 0.2);
+            box-shadow: 0 24px 50px rgba(12, 31, 48, 0.19);
             min-height: 640px;
             display: flex;
             flex-direction: column;
@@ -1769,18 +1769,20 @@
                     if (response.ok) {
                         const data = await response.json();
                         setMemories(data.memories || []);
-                        if (data.status && data.status.startsWith('cognee skipped')) {
-                            setMemoriesError('Memory service error: ' + data.status);
+                        if (data.status === 'rate_limited') {
+                            setMemoriesError('Memory is temporarily unavailable because the provider quota was reached. Tickets and chat still work.');
+                        } else if (data.status && data.status !== 'recalled') {
+                            setMemoriesError('Memory is temporarily unavailable. Your ticket conversation is still saved.');
                         }
                     } else {
-                        setMemoriesError(`Memory service returned status ${response.status}`);
+                        setMemoriesError('Memory is temporarily unavailable. Please try again later.');
                         console.warn("Cognee service recall returned error status code: " + response.status);
                     }
                 } catch (err) {
                     if (err.name === 'TimeoutError' || err.name === 'AbortError') {
-                        setMemoriesError('Memory recall timed out after 130s. The Cognee service may be slow or unreachable.');
+                        setMemoriesError('Memory lookup timed out. Ticket history is still available.');
                     } else {
-                        setMemoriesError('Could not reach the memory service: ' + err.message);
+                        setMemoriesError('Memory service is unavailable. Please try again later.');
                     }
                     console.warn("Cognee memory recall failed.", err);
                 } finally {
@@ -1897,7 +1899,7 @@
             const [email, setEmail] = useState('');
             const [name, setName] = useState('');
             const [password, setPassword] = useState('');
-            const [role, setRole] = useState('CUSTOMER'); // CUSTOMER, AGENT
+            const role = 'CUSTOMER'; // Only customers may self-register.
 
             const handleSubmit = async (e) => {
                 e.preventDefault();
@@ -1984,9 +1986,9 @@
                         <section className="auth-hero">
                             <div className="auth-hero-content">
                                 <div className="auth-hero-badge">Support that remembers</div>
-                                <h1 className="auth-hero-title">One place for support, memory, and resolution.</h1>
+                                <h1 className="auth-hero-title">Customer support with context, clarity, and control.</h1>
                                 <p className="auth-hero-copy">
-                                    OnceTold keeps every ticket, reply, and memory cue in one place so customers get faster help and agents get better context.
+                                    A unified support workspace for customer conversations, ticket operations, and auditable resolutions.
                                 </p>
 
                                 <div className="auth-feature-list">
@@ -2017,15 +2019,15 @@
                             <div className="auth-hero-footer">
                                 <div className="auth-hero-stats">
                                     <div className="auth-stat">
-                                        <strong>24/7</strong>
-                                        <span>support access</span>
+                                        <strong>Unified</strong>
+                                        <span>ticket workspace</span>
                                     </div>
                                     <div className="auth-stat">
                                         <strong>AI</strong>
-                                        <span>memory recall</span>
+                                        <span>assisted workflows</span>
                                     </div>
                                 </div>
-                                <div>Secure portal for customers and support agents</div>
+                                <div>Portfolio demonstration · Use fictional information only</div>
                             </div>
                         </section>
 
@@ -2106,25 +2108,7 @@
                                     </div>
 
                                     {activeTab === 'register' && (
-                                        <div className="form-group">
-                                            <label className="form-label">Role</label>
-                                            <div className="role-selector">
-                                                <button
-                                                    type="button"
-                                                    className={`role-option ${role === 'CUSTOMER' ? 'active' : ''}`}
-                                                    onClick={() => setRole('CUSTOMER')}
-                                                >
-                                                    Customer
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    className={`role-option ${role === 'AGENT' ? 'active' : ''}`}
-                                                    onClick={() => setRole('AGENT')}
-                                                >
-                                                    Support Agent
-                                                </button>
-                                            </div>
-                                        </div>
+                                        <p className="auth-card-copy">Create a customer account. Support agents are invited by an administrator.</p>
                                     )}
 
                                     <button className="submit-btn" type="submit" disabled={loading}>

@@ -1,6 +1,7 @@
 package com.oncetold.oncetold.security;
 
 import com.oncetold.oncetold.entity.User;
+import com.oncetold.oncetold.entity.Role;
 import com.oncetold.oncetold.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,11 +15,17 @@ import java.util.List;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final AgentAccessPolicy agentAccessPolicy;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+
+        // Re-check on every authenticated API request, including old signed JWTs.
+        if (user.getRole() == Role.AGENT && !agentAccessPolicy.isAllowed(user.getEmail())) {
+            throw new UsernameNotFoundException("Account is not authorized for staff access");
+        }
 
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),

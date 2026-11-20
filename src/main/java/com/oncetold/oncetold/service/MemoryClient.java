@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.util.Map;
+import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * HTTP client for the Python FastAPI Cognee memory microservice.
@@ -27,9 +29,12 @@ public class MemoryClient {
 
     private final RestClient patientClient; // for remember/improve/forget (async, can afford to wait)
     private final RestClient recallClient;  // bounded synchronous recall for chat
+    private final ObjectMapper objectMapper;
 
     public MemoryClient(@Value("${memory.service.base-url}") String baseUrl,
-                        @Value("${memory.service.recall-timeout-ms:8000}") int recallTimeoutMs) {
+                        @Value("${memory.service.recall-timeout-ms:8000}") int recallTimeoutMs,
+                        ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
         SimpleClientHttpRequestFactory patientFactory = new SimpleClientHttpRequestFactory();
         patientFactory.setConnectTimeout(10_000);
         patientFactory.setReadTimeout(90_000);
@@ -77,10 +82,19 @@ public class MemoryClient {
                             .build())
                     .retrieve()
                     .body(String.class);
-            log.debug("Memory /recall returned for customer {}", customerId);
-            return result;
+            if (result == null) return null;
+            @SuppressWarnings("unchecked")
+            Map<String, Object> response = objectMapper.readValue(result, Map.class);
+            if (!"recalled".equals(response.get("status"))) return null;
+            Object rawMemories = response.get("memories");
+            if (!(rawMemories instanceof List<?> memories) || memories.isEmpty()) return null;
+            // Only the verified, dataset-scoped strings from our Python bridge are used.
+            return memories.stream().filter(String.class::isInstance)
+                    .map(String.class::cast).limit(5)
+                    .map(memory -> memory.substring(0, Math.min(memory.length(), 2000)))
+                    .reduce((a, b) -> a + "\n" + b).orElse(null);
         } catch (Exception e) {
-            log.warn("Memory /recall failed or was too slow for customer {}: {}", customerId, e.getMessage());
+            log.warn("Memory recall unavailable for customer {}", customerId);
             return null;
         }
     }
