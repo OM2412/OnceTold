@@ -20,7 +20,7 @@ public class AuthController {
     /**
      * POST /api/auth/register
      * Public endpoint — no token required.
-     * Body: { "name": "...", "email": "...", "password": "...", "role": "CUSTOMER"|"AGENT" }
+     * Public registration accepts CUSTOMER only. Staff accounts are provisioned separately.
      */
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {

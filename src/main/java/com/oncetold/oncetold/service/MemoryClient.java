@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.util.Map;
+import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * HTTP client for the Python FastAPI Cognee memory microservice.
@@ -27,6 +29,7 @@ public class MemoryClient {
 
     private final RestClient patientClient; // for remember/improve/forget (async, can afford to wait)
     private final RestClient recallClient;  // bounded synchronous recall for chat
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public MemoryClient(@Value("${memory.service.base-url}") String baseUrl,
                         @Value("${memory.service.recall-timeout-ms:8000}") int recallTimeoutMs) {
@@ -60,7 +63,7 @@ public class MemoryClient {
                     .toBodilessEntity();
             log.debug("Memory /remember completed for customer {} ticket {}", customerId, ticketId);
         } catch (Exception e) {
-            log.warn("Memory /remember failed for customer {} ticket {}: {}", customerId, ticketId, e.getMessage());
+            log.warn("Memory /remember unavailable for ticket {}", ticketId);
         }
     }
 
@@ -77,17 +80,26 @@ public class MemoryClient {
                             .build())
                     .retrieve()
                     .body(String.class);
-            log.debug("Memory /recall returned for customer {}", customerId);
-            return result;
+            if (result == null) return null;
+            @SuppressWarnings("unchecked")
+            Map<String, Object> response = objectMapper.readValue(result, Map.class);
+            if (!"recalled".equals(response.get("status"))) return null;
+            Object rawMemories = response.get("memories");
+            if (!(rawMemories instanceof List<?> memories) || memories.isEmpty()) return null;
+            // Only the verified, dataset-scoped strings from our Python bridge are used.
+            return memories.stream().filter(String.class::isInstance)
+                    .map(String.class::cast).limit(5)
+                    .map(memory -> memory.substring(0, Math.min(memory.length(), 2000)))
+                    .reduce((a, b) -> a + "\n" + b).orElse(null);
         } catch (Exception e) {
-            log.warn("Memory /recall failed or was too slow for customer {}: {}", customerId, e.getMessage());
+            log.warn("Memory recall unavailable for customer {}", customerId);
             return null;
         }
     }
 
     /** Long recall for the authenticated UI; the bridge stays loopback-only. */
     public String recallDetails(String customerId) {
-        String result = patientClient.get()
+        String result = recallClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/recall")
                         .queryParam("customer_id", customerId)
                         .queryParam("query", "history").build())
@@ -111,7 +123,7 @@ public class MemoryClient {
                     .toBodilessEntity();
             log.debug("Memory /improve completed for customer {} ticket {}", customerId, ticketId);
         } catch (Exception e) {
-            log.warn("Memory /improve failed for customer {} ticket {}: {}", customerId, ticketId, e.getMessage());
+            log.warn("Memory /improve unavailable for ticket {}", ticketId);
         }
     }
 
@@ -128,7 +140,7 @@ public class MemoryClient {
                     .toBodilessEntity();
             log.debug("Memory /forget completed for customer {}", customerId);
         } catch (Exception e) {
-            log.warn("Memory /forget failed for customer {}: {}", customerId, e.getMessage());
+            log.warn("Memory /forget unavailable");
         }
     }
 }

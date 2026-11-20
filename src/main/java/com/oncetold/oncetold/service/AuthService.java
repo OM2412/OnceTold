@@ -6,6 +6,8 @@ import com.oncetold.oncetold.dto.RegisterRequest;
 import com.oncetold.oncetold.entity.User;
 import com.oncetold.oncetold.repository.UserRepository;
 import com.oncetold.oncetold.security.JwtUtil;
+import com.oncetold.oncetold.security.AgentAccessPolicy;
+import com.oncetold.oncetold.entity.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,12 +20,16 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final AgentAccessPolicy agentAccessPolicy;
 
     /**
      * Register a new user account and return a JWT token.
      * Throws IllegalArgumentException if the email is already taken.
      */
     public AuthResponse register(RegisterRequest request) {
+        if (request.getRole() != Role.CUSTOMER) {
+            throw new IllegalArgumentException("Support-agent accounts are provisioned by the administrator");
+        }
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email already registered: " + request.getEmail());
         }
@@ -32,7 +38,7 @@ public class AuthService {
                 .name(request.getName())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
+                .role(Role.CUSTOMER)
                 .build();
 
         User saved = userRepository.save(user);
@@ -46,6 +52,10 @@ public class AuthService {
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
+
+        if (user.getRole() == Role.AGENT && !agentAccessPolicy.isAllowed(user.getEmail())) {
+            throw new BadCredentialsException("Invalid email or password");
+        }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new BadCredentialsException("Invalid email or password");

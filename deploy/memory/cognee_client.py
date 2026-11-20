@@ -18,8 +18,8 @@ for a single, fully-tested code path â€” every write costs ~8-10s (real
 Cognee ingest against the LLM), acceptable for demo message volumes.
 """
 
-import json
 import os
+import time
 from typing import Any
 
 import httpx
@@ -28,6 +28,22 @@ BASE_URL = os.environ.get(
     "COGNEE_BASE_URL",
     "https://tenant-c7dd5c98-efbb-4717-b795-b3b23b68f96d.aws.cognee.ai",
 )
+
+# A quota-exhausted provider should not be called on every ticket view.
+_quota_cooldown_until = 0.0
+_QUOTA_COOLDOWN_SECONDS = 60 * 60
+
+
+def _provider_available() -> bool:
+    return time.monotonic() >= _quota_cooldown_until
+
+
+def _failure_status(exc: Exception) -> str:
+    global _quota_cooldown_until
+    if isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code == 429:
+        _quota_cooldown_until = time.monotonic() + _QUOTA_COOLDOWN_SECONDS
+        return "rate_limited"
+    return "unavailable"
 
 
 def _headers() -> dict:
@@ -60,15 +76,19 @@ async def _remember_to_dataset(content: str, dataset: str, filename: str):
 
 
 async def remember_ticket_message(content: str, customer_id: str):
+    if not _provider_available():
+        return "rate_limited"
     dataset = dataset_for_customer(customer_id)
     try:
         await _remember_to_dataset(content, dataset, "ticket_message.txt")
         return "remembered"
     except Exception as exc:
-        return f"cognee skipped: {type(exc).__name__}: {exc}"
+        return _failure_status(exc)
 
 
 async def recall_for_customer(query: str, customer_id: str):
+    if not _provider_available():
+        return "rate_limited", []
     dataset = dataset_for_customer(customer_id)
     payload = {
         "query": query,
@@ -88,16 +108,18 @@ async def recall_for_customer(query: str, customer_id: str):
         results = response.json()
         return "recalled", normalize_results(results, dataset)
     except Exception as exc:
-        return f"cognee skipped: {type(exc).__name__}: {exc}", []
+        return _failure_status(exc), []
 
 
 async def resolve_and_improve(resolution_content: str, customer_id: str):
+    if not _provider_available():
+        return "rate_limited"
     dataset = dataset_for_customer(customer_id)
     try:
         await _remember_to_dataset(resolution_content, dataset, "resolution.txt")
         return "improved"
     except Exception as exc:
-        return f"cognee skipped: {type(exc).__name__}: {exc}"
+        return _failure_status(exc)
 
 
 async def forget_dataset(customer_id: str):
@@ -113,35 +135,30 @@ async def forget_dataset(customer_id: str):
             response.raise_for_status()
         return "forgotten"
     except Exception as exc:
-        return f"cognee skipped: {type(exc).__name__}: {exc}"
+        return _failure_status(exc)
 
 
 def normalize_results(result: Any, dataset: str = None) -> list:
+    """Fail closed: never expose a memory unless its dataset is explicitly verified.
+
+    Some provider responses include unrelated/default results. Previously a
+    no-match fallback returned all records, leaking other customer histories.
+    Unknown or unlabelled formats are withheld until their isolation is proven.
     """
-    Flatten recall results into plain text strings.
-    Prefers items whose dataset_name matches the requested dataset (real,
-    customer-specific memory) and drops generic 'default_dataset' filler
-    that Cognee sometimes returns alongside the real match.
-    """
-    if result is None:
+    if not dataset:
         return []
-    if isinstance(result, str):
-        return [result]
-    if isinstance(result, list):
-        if dataset:
-            scoped = [
-                item for item in result
-                if isinstance(item, dict) and item.get("dataset_name") == dataset
-            ]
-            if scoped:
-                result = scoped
-        texts = []
-        for item in result:
-            if isinstance(item, dict) and "text" in item:
-                texts.append(item["text"])
-            elif isinstance(item, str):
-                texts.append(item)
-            else:
-                texts.append(json.dumps(item, default=str))
-        return texts
-    return [json.dumps(result, default=str)]
+    if isinstance(result, dict):
+        for key in ("results", "data", "memories"):
+            if isinstance(result.get(key), list):
+                return normalize_results(result[key], dataset)
+        result = [result]
+    if not isinstance(result, list):
+        return []
+    verified = []
+    for item in result:
+        if not isinstance(item, dict) or item.get("dataset_name") != dataset:
+            continue
+        content = item.get("text") or item.get("answer")
+        if isinstance(content, str) and content.strip():
+            verified.append(content[:2000])
+    return verified[:5]
