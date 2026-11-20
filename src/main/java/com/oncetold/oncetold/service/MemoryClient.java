@@ -29,12 +29,10 @@ public class MemoryClient {
 
     private final RestClient patientClient; // for remember/improve/forget (async, can afford to wait)
     private final RestClient recallClient;  // bounded synchronous recall for chat
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public MemoryClient(@Value("${memory.service.base-url}") String baseUrl,
-                        @Value("${memory.service.recall-timeout-ms:8000}") int recallTimeoutMs,
-                        ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+                        @Value("${memory.service.recall-timeout-ms:8000}") int recallTimeoutMs) {
         SimpleClientHttpRequestFactory patientFactory = new SimpleClientHttpRequestFactory();
         patientFactory.setConnectTimeout(10_000);
         patientFactory.setReadTimeout(90_000);
