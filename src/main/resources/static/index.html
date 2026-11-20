@@ -1899,11 +1899,13 @@
             const [email, setEmail] = useState('');
             const [name, setName] = useState('');
             const [password, setPassword] = useState('');
+            const [connectionNotice, setConnectionNotice] = useState('');
             const role = 'CUSTOMER'; // Only customers may self-register.
 
             const handleSubmit = async (e) => {
                 e.preventDefault();
                 setErrorMsg('');
+                setConnectionNotice('');
                 setLoading(true);
 
                 if (!email || !password) {
@@ -1918,6 +1920,9 @@
                     return;
                 }
 
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 30000);
+                const slowNotice = setTimeout(() => setConnectionNotice('Connecting to the free demo backend. It may need a moment to wake up.'), 3500);
                 try {
                     const endpoint = activeTab === 'login' ? '/api/auth/login' : '/api/auth/register';
                     const payload = activeTab === 'login' 
@@ -1927,7 +1932,8 @@
                     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify(payload),
+                        signal: controller.signal
                     });
 
                     if (response.ok) {
@@ -1973,9 +1979,14 @@
                         }
                     }
                 } catch (err) {
-                    setErrorMsg('Cannot connect to server. Make sure the backend is running');
+                    setErrorMsg(err.name === 'AbortError'
+                        ? 'The demo backend took too long to respond. Please retry in a moment.'
+                        : 'The demo backend is temporarily unreachable. Please try again.');
                     console.error(err);
                 } finally {
+                    clearTimeout(timeout);
+                    clearTimeout(slowNotice);
+                    setConnectionNotice('');
                     setLoading(false);
                 }
             };
@@ -2121,6 +2132,11 @@
                                             </>
                                         )}
                                     </button>
+                                    {connectionNotice && (
+                                        <p role="status" aria-live="polite" className="auth-card-copy" style={{ marginTop: '0.85rem' }}>
+                                            {connectionNotice}
+                                        </p>
+                                    )}
                                 </form>
                             </div>
                         </div>
