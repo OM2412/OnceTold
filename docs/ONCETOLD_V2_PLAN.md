@@ -67,6 +67,30 @@ Use a short product walkthrough/demo video as a fallback for recruiters.
 records** in the database, comma-separated. With an empty list all AGENT
 accounts are intentionally denied; CUSTOMER accounts still work.
 
+### Promoting a trusted existing customer to an agent
+
+There is deliberately no public role-switch endpoint. For a one-time operator
+provisioning deployment:
+
+1. Verify the user's identity and ownership of the email address.
+2. Add that email to `APP_AGENT_ALLOWLIST`.
+3. Set `APP_AGENT_BOOTSTRAP_ENABLED=true` and
+   `APP_AGENT_BOOTSTRAP_EMAIL=<verified-email>` on the server.
+4. Deploy, check successful startup, then **remove the two bootstrap variables**
+   and deploy again. The account's password is unchanged.
+5. Test that this account sees agent tickets and an unrelated customer account
+   cannot see them. Audit existing AGENT accounts created before the fix.
+
+Bootstrap is off by default and refuses an email outside the allowlist. It is
+not an admin self-service UI and should never be left enabled permanently.
+
+### Free-tier resource discipline
+
+The frontend now suppresses ticket polling in hidden tabs, refreshes when the
+tab returns to the foreground, and uses a 30-second list / 12-second selected
+conversation cadence. This reduces unnecessary backend requests, but does not
+remove the Render free plan's cold-start delay or guarantee uptime.
+
 Never add an email merely because it was previously registered as an agent:
 public registration used to permit anyone to acquire that role.
 
