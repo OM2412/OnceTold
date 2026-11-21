@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101e35">
+  <title>OnceTold — Interactive Product Demo</title>
+  <style>
+    :root{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#15253b;background:#f3f6fa;font-synthesis:none}
+    *{box-sizing:border-box}body{margin:0}button,input,textarea{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.55}
+    .top{background:#101e35;color:#fff;padding:18px max(20px,calc((100vw - 1240px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{font-weight:850;font-size:23px;letter-spacing:-1px}.brand em{color:#42c9b5;font-style:normal}.top a{color:#fff;text-decoration:none;border:1px solid #56657a;border-radius:10px;padding:9px 12px;font-size:13px}
+    .notice{background:#e2faf4;border-bottom:1px solid #bce6db;color:#16564e;padding:12px 24px;text-align:center;font-size:13px;line-height:1.5}
+    .wrap{max-width:1240px;margin:auto;padding:28px 18px 55px}.intro{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;margin-bottom:22px}
+    .eyebrow{text-transform:uppercase;letter-spacing:2px;font-size:11px;color:#087a71;font-weight:800}h1{font-size:clamp(27px,4vw,38px);letter-spacing:-1.3px;line-height:1.12;margin:8px 0}p{line-height:1.55;color:#64738b;margin:8px 0}
+    .switch{display:flex;padding:5px;background:#dfe7ee;border-radius:14px;gap:3px}.switch button{border:0;border-radius:10px;padding:12px 18px;background:transparent;color:#52647b;font-weight:750}.switch button.active{background:white;color:#087a71;box-shadow:0 2px 9px #203e5012}
+    .grid{display:grid;grid-template-columns:310px minmax(0,1fr);gap:18px}.panel{background:white;border:1px solid #e1e8f0;border-radius:18px;box-shadow:0 5px 30px #19314c08;overflow:hidden}
+    .panel-head{padding:22px;border-bottom:1px solid #e6edf4}.panel-head h2{font-size:17px;margin:0 0 5px}.panel-head small{color:#728198}.search{margin-top:14px;width:100%;padding:12px;border:1px solid #d6e0e9;border-radius:10px;outline-color:#159f90}
+    .filters{display:flex;gap:6px;margin-top:11px}.filters button{background:#f2f5f9;color:#64738b;border:0;border-radius:8px;padding:8px 9px;font-size:12px;font-weight:700}.filters button.active{color:#006c61;background:#dff6f0}
+    .ticket-list{max-height:600px;overflow:auto}.ticket{display:block;border:0;border-bottom:1px solid #eaf0f5;background:white;text-align:left;width:100%;padding:16px 20px}.ticket.active{background:#effaf7;border-left:4px solid #12a794;padding-left:16px}.ticket:hover{background:#f5fafb}.ticket strong{font-size:13px;display:block;margin-bottom:9px;line-height:1.45}.ticket-meta{display:flex;gap:5px;align-items:center;flex-wrap:wrap;font-size:11px;color:#6d7c90}
+    .pill{font-size:10px;border-radius:99px;padding:4px 7px;font-weight:800;letter-spacing:.25px}.pill.open{background:#e7f4fc;color:#2773a2}.pill.resolved{background:#e5f8ed;color:#288057}.pill.high{background:#fff1e6;color:#bc5d1b}.pill.medium{background:#f4f0ff;color:#7664b7}
+    .content{min-height:570px}.detail-top{padding:23px;border-bottom:1px solid #e9eef5;display:flex;gap:16px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}.detail-top h2{margin:7px 0;font-size:21px}.subtle{font-size:12px;color:#748299}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}.action{border:1px solid #d5e1e9;background:#fff;color:#264459;border-radius:9px;padding:9px 12px;font-size:12px;font-weight:750}.action.primary{background:#078a7e;color:#fff;border-color:#078a7e}.action:focus-visible,.switch button:focus-visible,.ticket:focus-visible{outline:3px solid #67dbc8;outline-offset:2px}
+    .body{display:grid;grid-template-columns:minmax(0,1fr) 250px}.thread{padding:24px;min-width:0}.message{margin:0 0 17px;max-width:94%}.message.mine{margin-left:auto}.bubble{background:#f2f6f9;padding:12px 15px;border-radius:13px;line-height:1.5;font-size:13px;white-space:pre-wrap}.mine .bubble{background:#dcf7f1}.byline{font-size:10px;color:#8793a3;margin:6px 2px}.mine .byline{text-align:right}.composer{display:flex;gap:9px;align-items:flex-end;border-top:1px solid #e4eaf0;padding-top:18px;margin-top:22px}.composer textarea{min-height:65px;resize:vertical;flex:1;min-width:0;padding:11px;border-radius:10px;border:1px solid #d3e0e9}.composer button{border:0;border-radius:10px;background:#078a7e;color:#fff;font-weight:750;padding:12px 16px}
+    .context{background:#fbfcfe;border-left:1px solid #e7edf3;padding:22px}.context h3{font-size:13px;margin:0 0 12px}.context ul{padding-left:17px;font-size:12px;color:#506075;line-height:1.7}.context .fact{background:white;border:1px solid #e2eaf0;border-radius:10px;padding:11px;margin:9px 0;font-size:12px;line-height:1.5}.context .fact small{display:block;color:#7891a0;font-weight:750;margin-bottom:3px}.empty{text-align:center;padding:65px 20px;color:#8191a4}.metric-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.metric{background:#fff;border:1px solid #e2e9f1;border-radius:12px;padding:13px 18px;min-width:140px}.metric b{display:block;font-size:22px}.metric span{font-size:11px;color:#76879a}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}.ticket-list{max-height:270px}.body{grid-template-columns:1fr}.context{border-left:0;border-top:1px solid #e7edf3}.content{min-height:0}}
+    @media(max-width:500px){.top{padding:15px}.wrap{padding:20px 12px}.panel-head,.detail-top,.thread,.context{padding:16px}.switch{width:100%}.switch button{flex:1;padding:10px}.intro{align-items:stretch}.metric{min-width:100px;flex:1}}
+  </style>
+</head>
+<body>
+  <header class="top"><div class="brand">Once<em>Told</em> <span style="font-size:12px;color:#a9c2d2;font-weight:500;letter-spacing:0">/ PRODUCT TOUR</span></div><a href="/">← Real application</a></header>
+  <div class="notice"><strong>Interactive simulation.</strong> Every person, company, ticket and memory below is fictional. Changes stay in this browser session; nothing reaches a production API or database.</div>
+  <main class="wrap">
+    <div class="intro"><div><span class="eyebrow">Explore the complete support lifecycle</span><h1>One conversation. Two perspectives.</h1><p>Switch roles, respond to a request, and resolve it in a secure, self-contained demo.</p></div><div class="switch" role="group" aria-label="Demo role"><button id="customer" class="active" aria-pressed="true">Customer view</button><button id="agent" aria-pressed="false">Agent view</button></div></div>
+    <div class="metric-row" aria-label="Sample workspace metrics"><div class="metric"><b id="total">3</b><span>Demo tickets</span></div><div class="metric"><b id="open">2</b><span>Open requests</span></div><div class="metric"><b id="resolved">1</b><span>Resolved requests</span></div></div>
+    <div class="grid" style="margin-top:20px"><section class="panel"><div class="panel-head"><h2 id="inbox-title">My requests</h2><small id="inbox-subtitle">Sample customer history</small><label class="sr-only" for="search">Search tickets</label><input id="search" class="search" type="search" placeholder="Search tickets or ID"><div class="filters" role="group" aria-label="Ticket status"><button data-filter="ALL" class="active" aria-pressed="true">All</button><button data-filter="OPEN" aria-pressed="false">Open</button><button data-filter="RESOLVED" aria-pressed="false">Resolved</button></div></div><div id="tickets" class="ticket-list" aria-label="Demo ticket list"></div></section><section class="panel content" id="detail" aria-live="polite"></section></div>
+    <p style="font-size:12px;text-align:center;margin-top:22px">Built to demonstrate UX and workflow, not production data. <a href="/" style="color:#087e76">Sign in to the real app</a> for authenticated ticket operations.</p>
+  </main>
+  <script>
+    'use strict';
+    // No network requests, credentials, browser storage or account permissions are used by this demo.
+    const seed = [
+      {id:1042,subject:'Weekend overtime payment',owner:'Aarav Sharma',status:'OPEN',priority:'HIGH',assignee:'Unassigned',facts:['Works recurring weekend shifts','Asked for an overtime-pay clarification'],messages:[{from:'Customer',text:'I worked two weekend shifts but my payslip has no overtime entry.'},{from:'Support assistant',text:'I have recorded your concern. A support specialist can review the attendance and payroll details.'}]},
+      {id:1041,subject:'Subscription invoice correction',owner:'Mira Patel',status:'OPEN',priority:'MEDIUM',assignee:'Nisha Rao',facts:['Requested an updated billing address','Invoice revision is pending verification'],messages:[{from:'Customer',text:'The billing address on the November invoice needs updating.'},{from:'Agent',text:'Thanks, Mira. I have assigned this for review. Please avoid sharing payment details in chat.'}]},
+      {id:1039,subject:'Cannot access help-center article',owner:'Aarav Sharma',status:'RESOLVED',priority:'LOW',assignee:'Nisha Rao',facts:['Reported a broken article link','Received a replacement resource'],messages:[{from:'Customer',text:'The setup article returns a 404 error.'},{from:'Agent',text:'Thanks for flagging this. We updated the reference and confirmed that it opens correctly.'}]}
+    ];
+    const tickets=seed.map(t=>({...t,messages:t.messages.map(m=>({...m})),facts:[...t.facts]}));
+    let role='customer', filter='ALL', selected=1042;
+    const $=id=>document.getElementById(id);
+    const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    function scoped(){return role==='agent'?tickets:tickets.filter(t=>t.owner==='Aarav Sharma')}
+    function visible(){const q=$('search').value.trim().toLowerCase();return scoped().filter(t=>(filter==='ALL'||t.status===filter)&&(!q||t.subject.toLowerCase().includes(q)||String(t.id).includes(q)))}
+    function render(){
+      $('customer').classList.toggle('active',role==='customer');$('agent').classList.toggle('active',role==='agent');$('customer').setAttribute('aria-pressed',role==='customer');$('agent').setAttribute('aria-pressed',role==='agent');
+      $('inbox-title').textContent=role==='agent'?'Team inbox':'My requests';$('inbox-subtitle').textContent=role==='agent'?'Triage and resolve fictional support requests':'Follow your fictional support conversations';
+      $('total').textContent=scoped().length;$('open').textContent=scoped().filter(t=>t.status==='OPEN').length;$('resolved').textContent=scoped().filter(t=>t.status==='RESOLVED').length;
+      const list=visible();if(!list.find(t=>t.id===selected))selected=list[0]?.id??null;
+      $('tickets').innerHTML=list.length?list.map(t=>`<button type="button" class="ticket ${t.id===selected?'active':''}" data-ticket="${t.id}" aria-pressed="${t.id===selected}"><strong>${esc(t.subject)}</strong><span class="ticket-meta"><span class="pill ${t.status.toLowerCase()}">${t.status}</span><span class="pill ${t.priority.toLowerCase()}">${t.priority}</span><span>#${t.id}</span>${role==='agent'?`<span>· ${esc(t.owner)}</span>`:''}</span></button>`).join(''):'<div class="empty">No matching requests.</div>';
+      const t=tickets.find(x=>x.id===selected);
+      if(!t){$('detail').innerHTML='<div class="empty">Choose a request to view the conversation.</div>';return;}
+      const agentActions=role==='agent'?`<div class="actions"><button id="assign" class="action" type="button">${t.assignee==='Unassigned'?'Assign to me':'Assigned: '+esc(t.assignee)}</button><button id="resolve" class="action primary" type="button">${t.status==='OPEN'?'Resolve ticket':'Reopen ticket'}</button></div>`:`<span class="pill ${t.status.toLowerCase()}">${t.status}</span>`;
+      $('detail').innerHTML=`<div class="detail-top"><div><span class="subtle">TICKET #${t.id} · ${role==='agent'?esc(t.owner):'Your request'}</span><h2>${esc(t.subject)}</h2><span class="subtle">${t.priority} PRIORITY · ${esc(t.assignee)}</span></div>${agentActions}</div><div class="body"><div class="thread"><h3 style="font-size:13px;margin:0 0 20px">Conversation timeline</h3>${t.messages.map(m=>`<div class="message ${m.from===(role==='agent'?'Agent':'Customer')?'mine':''}"><div class="bubble">${esc(m.text)}</div><div class="byline">${esc(m.from)} · sample</div></div>`).join('')}<form id="reply" class="composer"><label for="message" class="sr-only">Type demo reply</label><textarea id="message" maxlength="500" required placeholder="${role==='agent'?'Write a support response':'Write a follow-up'}"></textarea><button type="submit">Send</button></form></div><aside class="context"><h3>Customer context</h3><p style="font-size:12px">Sample memory cards, not AI-generated or retrieved from a real provider.</p>${t.facts.map((f,i)=>`<div class="fact"><small>FACT ${i+1}</small>${esc(f)}</div>`).join('')}<h3 style="margin-top:25px">Workflow</h3><ul><li>Conversation history preserved in this session</li><li>Sample customer context</li><li>Agent-led status transitions</li></ul></aside></div>`;
+      $('reply').addEventListener('submit',e=>{e.preventDefault();const text=$('message').value.trim();if(!text)return;t.messages.push({from:role==='agent'?'Agent':'Customer',text});render();});
+      if(role==='agent'){
+        $('assign').addEventListener('click',()=>{t.assignee='Demo Agent';render();});
+        $('resolve').addEventListener('click',()=>{t.status=t.status==='OPEN'?'RESOLVED':'OPEN';render();});
+      }
+    }
+    $('customer').addEventListener('click',()=>{role='customer';render();});$('agent').addEventListener('click',()=>{role='agent';render();});
+    $('search').addEventListener('input',render);document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;document.querySelectorAll('[data-filter]').forEach(n=>{n.classList.toggle('active',n===b);n.setAttribute('aria-pressed',n===b)});render();}));
+    $('tickets').addEventListener('click',e=>{const b=e.target.closest('[data-ticket]');if(b){selected=Number(b.dataset.ticket);render();}});
+    render();
+  </script>
+</body>
+</html>
