@@ -4,15 +4,17 @@
 
 *Hangover Hackathon submission — WeMakeDevs × Cognee*
 
-**[Open the live demo](https://oncetold-hrma.onrender.com)**
+**[Open the live application](https://oncetold.pages.dev/)**
+
+**[Explore the instant, no-signup product tour](https://oncetold.pages.dev/demo.html)** — fictional ticket data and customer/agent views run entirely in the browser; no production data or APIs are used. This is an interactive simulation, not a real agent session.
 
 OnceTold is a customer-support prototype that recalls customer-scoped history before an AI reply and writes ticket resolutions back to a Cognee memory graph.
 
 ## Try it
 
-Use fictional information only. Register a customer, create a ticket, and send a message. Register a separate support-agent account to review and resolve the ticket with a summary. Return as the same customer and open a related ticket to explore recalled history.
+Use fictional information only. Register a customer, create a ticket, and send a message. Agent accounts require trusted operator provisioning; public signup cannot grant AGENT access. Return as the same customer and open a related ticket to explore recalled history. Alternatively, use the instant browser-only product tour to see both roles without signup.
 
-The public demo uses Render Free, Neon PostgreSQL, Groq and Cognee Cloud. A sleeping instance can take several minutes to start, and memory queries can be slow. Availability depends on the providers' free allowances and API quotas. This is a portfolio demonstration, not a production support system: the demo permits agent registration.
+The live application uses Cloudflare Pages for its frontend and Render Free, Neon PostgreSQL, Groq and Cognee Cloud for its backend. A sleeping Render instance can take several minutes to start, and memory queries can be slow. Availability depends on the providers' free allowances and API quotas. This is a portfolio prototype, not yet a production support system. The separate no-signup tour uses synthetic data and no live backend calls.
 
 ## How the memory loop works
 
