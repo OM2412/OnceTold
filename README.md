@@ -4,7 +4,7 @@
 
 **Customer-scoped ticket memory, evidence-aware recall, and a learning support workflow powered by Cognee and Groq.**
 
-[**Cloudflare Frontend**](https://oncetold.pages.dev/) · [**Interactive Product Tour**](https://oncetold.pages.dev/demo.html) · [**GitHub Repository**](https://github.com/OM2412/OnceTold)
+[**Render Live App**](https://oncetold-y69f.onrender.com/) · [**Cloudflare Frontend**](https://oncetold.pages.dev/) · [**Interactive Product Tour**](https://oncetold.pages.dev/demo.html) · [**GitHub Repository**](https://github.com/OM2412/OnceTold)
 
 ![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0-green) ![React](https://img.shields.io/badge/UI-React-blue) ![Cognee](https://img.shields.io/badge/Memory-Cognee-purple) ![PostgreSQL](https://img.shields.io/badge/Database-Neon_PostgreSQL-blue)
 
@@ -21,11 +21,11 @@
 
 **Try it:** Visit the [Cloudflare application](https://oncetold.pages.dev/) or explore the [no-signup synthetic tour](https://oncetold.pages.dev/demo.html). The tour is browser-only and does not test live backend services.
 
-> **Deployment caveat:** The Cloudflare URL is documented in this repository, but current uptime is unverified. The frontend source and Render deployment guide reference different backend hostnames; verify the active service before describing end-to-end availability.
+> **Deployment caveat:** The Cloudflare URL is documented in this repository, but current uptime is unverified. The updated Render deployment provided by the owner is https://oncetold-y69f.onrender.com/; end-to-end availability is not independently verified.
 
 # OnceTold 🧠
 
-> **Project links:** [Application](https://oncetold.pages.dev/) · [Synthetic, no-signup tour](https://oncetold.pages.dev/demo.html) · [Source](https://github.com/OM2412/OnceTold) · [Original standalone memory bridge](https://github.com/OM2412/OnceTold-Memory).  
+ > **Project links:** [Render app](https://oncetold-y69f.onrender.com/) · [Cloudflare app](https://oncetold.pages.dev/) · [Synthetic, no-signup tour](https://oncetold.pages.dev/demo.html) · [Source](https://github.com/OM2412/OnceTold) · [Original standalone memory bridge](https://github.com/OM2412/OnceTold-Memory).  
 > Published project URLs; third-party host uptime was not independently rechecked. The tour does not prove that the backend, Groq or Cognee are currently available.
 
 
@@ -33,7 +33,7 @@
 
 *Hangover Hackathon submission — WeMakeDevs × Cognee*
 
-**[Open the live application](https://oncetold.pages.dev/)**
+**[Open the Render application](https://oncetold-y69f.onrender.com/)** · [Cloudflare frontend](https://oncetold.pages.dev/)
 
 **[Explore the instant, no-signup product tour](https://oncetold.pages.dev/demo.html)** — fictional ticket data and customer/agent views run entirely in the browser; no production data or APIs are used. This is an interactive simulation, not a real agent session.
 
