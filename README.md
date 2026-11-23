@@ -1,5 +1,9 @@
 # OnceTold 🧠
 
+> **Project links:** [Application](https://oncetold.pages.dev/) · [Synthetic, no-signup tour](https://oncetold.pages.dev/demo.html) · [Source](https://github.com/OM2412/OnceTold) · [Original standalone memory bridge](https://github.com/OM2412/OnceTold-Memory).  
+> Published project URLs; third-party host uptime was not independently rechecked. The tour does not prove that the backend, Groq or Cognee are currently available.
+
+
 **Tell us once. We'll remember.**
 
 *Hangover Hackathon submission — WeMakeDevs × Cognee*
