@@ -1,3 +1,28 @@
+<div align="center">
+
+# OnceTold — AI Support That Remembers
+
+**Customer-scoped ticket memory, evidence-aware recall, and a learning support workflow powered by Cognee and Groq.**
+
+[**Cloudflare Frontend**](https://oncetold.pages.dev/) · [**Interactive Product Tour**](https://oncetold.pages.dev/demo.html) · [**GitHub Repository**](https://github.com/OM2412/OnceTold)
+
+![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0-green) ![React](https://img.shields.io/badge/UI-React-blue) ![Cognee](https://img.shields.io/badge/Memory-Cognee-purple) ![PostgreSQL](https://img.shields.io/badge/Database-Neon_PostgreSQL-blue)
+
+</div>
+
+## Project snapshot
+
+| Problem | OnceTold approach |
+| --- | --- |
+| Customers repeatedly explain the same issue | Recall scoped prior ticket history before generating a new response |
+| Support answers lose context after a ticket closes | Record agent resolutions in the customer's Cognee memory graph |
+| Memory can be slow or temporarily unavailable | Bound recall time and allow a response without retrieved memory |
+| Different customers must not access each other's history | Enforce ticket ownership on the backend; never trust a browser-supplied customer ID |
+
+**Try it:** Visit the [Cloudflare application](https://oncetold.pages.dev/) or explore the [no-signup synthetic tour](https://oncetold.pages.dev/demo.html). The tour is browser-only and does not test live backend services.
+
+> **Deployment caveat:** The Cloudflare URL is documented in this repository, but current uptime is unverified. The frontend source and Render deployment guide reference different backend hostnames; verify the active service before describing end-to-end availability.
+
 # OnceTold 🧠
 
 > **Project links:** [Application](https://oncetold.pages.dev/) · [Synthetic, no-signup tour](https://oncetold.pages.dev/demo.html) · [Source](https://github.com/OM2412/OnceTold) · [Original standalone memory bridge](https://github.com/OM2412/OnceTold-Memory).  
